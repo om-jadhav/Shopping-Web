@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign up</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="tag">shopline</div>
+
+<div class="card">
+  <h1>Create your account</h1>
+  <p class="subtitle">Start shopping in a couple of minutes.</p>
+
+  <form id="signupForm">
+    <label for="fullName">Full name</label>
+    <input id="fullName" type="text" placeholder="Jane Doe" />
+
+    <label for="email">Email</label>
+    <input id="email" type="email" placeholder="you@example.com" required />
+
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="At least 6 characters" required minlength="6" />
+
+    <button type="submit" id="submitBtn">Sign up</button>
+    <div id="msg" class="message"></div>
+  </form>
+
+  <p class="switch-link">Already have an account? <a href="/login.html">Log in</a></p>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/signup.js"></script>
+</body>
+</html>
