@@ -13,8 +13,12 @@ form.addEventListener("submit", async (e) => {
   try {
     const data = await apiPost("/auth/login", { email, password });
     saveToken(data.session.access_token);
+
+    const isAdmin = data.profile?.role === "admin";
     showMessage(msg, "Logged in! Redirecting…", "success");
-    setTimeout(() => (window.location.href = "/index.html"), 600);
+    setTimeout(() => {
+      window.location.href = isAdmin ? "/admin.html" : "/products.html";
+    }, 600);
   } catch (err) {
     showMessage(msg, err.message, "error");
   } finally {

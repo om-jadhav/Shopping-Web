@@ -28,8 +28,6 @@ async function signup(req, res) {
     return res.status(400).json({ error: error.message });
   }
 
-  // Note: if "Confirm email" is enabled in Supabase Auth settings,
-  // data.session will be null until the user clicks the email link.
   return res.status(201).json({
     message: data.session
       ? "Signup successful."
@@ -53,9 +51,19 @@ async function login(req, res) {
     return res.status(401).json({ error: error.message });
   }
 
+  // Fetch the profile too, so the frontend knows the role (admin vs
+  // customer) right away and can redirect accordingly - no extra request.
+  let profile = null;
+  try {
+    profile = await profileModel.getProfileById(data.user.id);
+  } catch (err) {
+    // Non-fatal - login still succeeds even if the profile lookup fails.
+  }
+
   return res.status(200).json({
     message: "Login successful.",
     user: data.user,
+    profile,
     session: data.session, // contains access_token the frontend should store
   });
 }
@@ -75,8 +83,6 @@ async function getMe(req, res) {
     const profile = await profileModel.getProfileById(req.user.id);
     return res.status(200).json({ user: req.user, profile });
   } catch (err) {
-    // Profile row might not exist yet if the DB trigger wasn't set up -
-    // still return the auth user so the endpoint isn't a hard failure.
     return res.status(200).json({ user: req.user, profile: null, profileError: err.message });
   }
 }

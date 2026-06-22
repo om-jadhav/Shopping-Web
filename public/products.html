@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shop</title>
+<link rel="stylesheet" href="/css/style.css" />
+<link rel="stylesheet" href="/css/products.css" />
+</head>
+<body class="page-shop">
+
+<div class="tag">shopline</div>
+<div class="nav-links" id="navLinks"></div>
+
+<div class="shop-wrap">
+  <div class="shop-header">
+    <h1>Shop</h1>
+    <div class="filters">
+      <select id="genderFilter">
+        <option value="">All genders</option>
+        <option value="men">Men</option>
+        <option value="women">Women</option>
+        <option value="unisex">Unisex</option>
+        <option value="kids">Kids</option>
+      </select>
+      <select id="categoryFilter">
+        <option value="">All categories</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="grid" class="product-grid">
+    <p class="empty-state">Loading…</p>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/nav.js"></script>
+</body>
+</html>
