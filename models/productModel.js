@@ -33,7 +33,8 @@ async function getProductById(id) {
 
 // ---- Admin writes (service role client, bypasses RLS) ----
 
-async function createProduct({ name, description, brand, gender, categoryId, price, imageUrl, variants }) {
+// FIXED: Expecting imageUrls array here instead of single string imageUrl
+async function createProduct({ name, description, brand, gender, categoryId, price, imageUrls, variants }) {
   const { data: product, error } = await supabaseAdmin
     .from("products")
     .insert({
@@ -43,7 +44,7 @@ async function createProduct({ name, description, brand, gender, categoryId, pri
       gender,
       category_id: categoryId || null,
       price,
-      image_url: imageUrl,
+      image_urls: imageUrls || [], // 🚀 FIXED: Maps array elements directly to 'image_urls' column
     })
     .select()
     .single();
@@ -72,7 +73,7 @@ async function createProduct({ name, description, brand, gender, categoryId, pri
 async function updateProduct(id, updates) {
   const { data, error } = await supabaseAdmin
     .from("products")
-    .update(updates)
+    .update(updates) // This passes down the clean 'image_urls' property we set in the controller
     .eq("id", id)
     .select()
     .single();
@@ -85,9 +86,8 @@ async function deleteProduct(id) {
   const { error } = await supabaseAdmin.from("products").delete().eq("id", id);
   if (error) throw error;
 }
+
 // Admin view - sees EVERYTHING, including deactivated products.
-// Uses supabaseAdmin since the anon client's RLS policy only allows
-// is_active = true rows.
 async function getAllProductsForAdmin() {
   const { data, error } = await supabaseAdmin
     .from("products")

@@ -1,83 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin - Manage Products</title>
-<link rel="stylesheet" href="/css/style.css" />
-<link rel="stylesheet" href="/css/admin.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Manage Products</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
 </head>
+
 <body class="page-admin">
 
-<div class="tag">shopline</div>
+  <div class="tag">shopline</div>
 
-<div class="admin-wrap">
-  <div class="admin-header">
-    <h1>Manage Products</h1>
-    <div class="links">
-      <a href="/products.html">View shop</a>
-      <a href="#" id="logoutLink">Log out</a>
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <h1>Manage Products</h1>
+      <div class="links">
+        <a href="/products.html">View shop</a>
+        <a href="#" id="logoutLink">Log out</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 id="formHeading">Add a new product</h2>
+        <a href="#" id="cancelEditLink" style="display: none; color: #d9534f; font-size: 0.9rem;">Cancel Edit</a>
+      </div>
+      <form id="productForm">
+        <label for="name">Product name</label>
+        <input id="name" type="text" placeholder="Classic Crew T-Shirt" required />
+
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="100% cotton, regular fit."></textarea>
+
+        <div class="field-row">
+          <div>
+            <label for="brand">Brand</label>
+            <input id="brand" type="text" placeholder="Shopline" />
+          </div>
+          <div>
+            <label for="price">Price (₹)</label>
+            <input id="price" type="number" min="0" step="0.01" placeholder="799" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div>
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="unisex">Unisex</option>
+              <option value="men">Men</option>
+              <option value="women">Women</option>
+              <option value="kids">Kids</option>
+            </select>
+          </div>
+          <div>
+            <label for="category">Category</label>
+            <select id="category"></select>
+          </div>
+        </div>
+
+        <label for="productImages">Product Images * (Select up to 10)</label>
+        <input id="productImages" type="file" accept="image/*" multiple required />
+        <small style="color: #888; display: block; margin-top: -5px; margin-bottom: 15px;">
+          Tip: Hold Ctrl (Win) or Cmd (Mac) to select multiple images.
+        </small>
+
+        <label>Variants (size / color / stock)</label>
+        <div class="variant-labels">
+          <span>Size</span><span>Color</span><span>Stock</span><span></span>
+        </div>
+        <div id="variantRows"></div>
+        <button type="button" id="addVariantBtn" class="add-variant-btn">+ Add another variant</button>
+
+        <button type="submit" id="submitBtn">Create product</button>
+        <div id="formMsg" class="message"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Existing products</h2>
+      <div id="productList">Loading…</div>
     </div>
   </div>
 
-  <div class="panel">
-    <h2>Add a new product</h2>
-    <form id="productForm">
-      <label for="name">Product name</label>
-      <input id="name" type="text" placeholder="Classic Crew T-Shirt" required />
-
-      <label for="description">Description</label>
-      <textarea id="description" placeholder="100% cotton, regular fit."></textarea>
-
-      <div class="field-row">
-        <div>
-          <label for="brand">Brand</label>
-          <input id="brand" type="text" placeholder="Shopline" />
-        </div>
-        <div>
-          <label for="price">Price (₹)</label>
-          <input id="price" type="number" min="0" step="0.01" placeholder="799" required />
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div>
-          <label for="gender">Gender</label>
-          <select id="gender">
-            <option value="unisex">Unisex</option>
-            <option value="men">Men</option>
-            <option value="women">Women</option>
-            <option value="kids">Kids</option>
-          </select>
-        </div>
-        <div>
-          <label for="category">Category</label>
-          <select id="category"></select>
-        </div>
-      </div>
-
-      <label for="imageUrl">Image URL (optional for now)</label>
-      <input id="imageUrl" type="text" placeholder="https://..." />
-
-      <label>Variants (size / color / stock)</label>
-      <div class="variant-labels">
-        <span>Size</span><span>Color</span><span>Stock</span><span></span>
-      </div>
-      <div id="variantRows"></div>
-      <button type="button" id="addVariantBtn" class="add-variant-btn">+ Add another variant</button>
-
-      <button type="submit" id="submitBtn">Create product</button>
-      <div id="formMsg" class="message"></div>
-    </form>
-  </div>
-
-  <div class="panel">
-    <h2>Existing products</h2>
-    <div id="productList">Loading…</div>
-  </div>
-</div>
-
-<script src="/js/api.js"></script>
-<script src="/js/admin.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/admin.js"></script>
 </body>
+
 </html>

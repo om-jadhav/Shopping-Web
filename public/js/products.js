@@ -31,10 +31,13 @@ function renderProducts(products) {
       );
       const outOfStock = totalStock === 0 && (p.product_variants || []).length > 0;
 
+      // 🚀 FIXED: Grab the first image link from your new database array structure
+      const firstImage = (p.image_urls && p.image_urls.length > 0) ? p.image_urls[0] : null;
+
       return `
         <a class="product-card" href="/product-detail.html?id=${p.id}">
           <div class="img-box">
-            ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" />` : "No image"}
+            ${firstImage ? `<img src="${firstImage}" alt="${p.name}" />` : "No image"}
           </div>
           <div class="info">
             <div class="cat-label">${p.category ? p.category.name : "Uncategorized"}</div>
