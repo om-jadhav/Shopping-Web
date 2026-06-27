@@ -1,7 +1,7 @@
 // controllers/productController.js
 const productModel = require("../models/productModel");
 const { supabaseAdmin } = require("../config/supabaseClient");
-const sharp = require("sharp"); // 1. Import sharp at the top
+const sharp = require("sharp");
 
 // GET /api/products?category=2&gender=men&search=shirt
 async function listProducts(req, res) {
@@ -44,7 +44,6 @@ async function createProduct(req, res) {
 
     let processedUrls = [];
 
-    // Check if multer processed any images
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.jpg`;
@@ -76,7 +75,6 @@ async function createProduct(req, res) {
       }
     }
 
-    // Build product payload explicitly to prevent front-end fields from muddying variable bindings
     const productData = {
       name: req.body.name,
       description: req.body.description,
@@ -84,7 +82,7 @@ async function createProduct(req, res) {
       gender: req.body.gender,
       categoryId: req.body.categoryId,
       price: req.body.price,
-      imageUrls: processedUrls // 🚀 Explicitly bind camelCase array to match model destructuring 
+      imageUrls: processedUrls
     };
 
     if (typeof req.body.variants === 'string') {
@@ -108,9 +106,8 @@ async function updateProduct(req, res) {
   try {
     const body = req.body;
     const updates = {};
-    let variantsArray = null; // Track variants separately
+    let variantsArray = null;
 
-    // Map regular updates
     if (body.name !== undefined) updates.name = body.name;
     if (body.description !== undefined) updates.description = body.description;
     if (body.brand !== undefined) updates.brand = body.brand;
@@ -119,7 +116,6 @@ async function updateProduct(req, res) {
     if (body.isActive !== undefined) updates.is_active = body.isActive;
     if (body.categoryId !== undefined) updates.category_id = body.categoryId;
 
-    // FIX: Parse variants into a standalone variable instead of the updates object
     if (typeof body.variants === 'string') {
       try {
         variantsArray = JSON.parse(body.variants);
@@ -128,10 +124,24 @@ async function updateProduct(req, res) {
       }
     }
 
-    // --- INTERCEPT AND PROCESS NEW IMAGE UPLOADS FOR EDITS ---
-    if (req.files && req.files.length > 0) {
-      let processedUrls = [];
+    // 1. Fetch the product's current database state BEFORE applying updates
+    const currentProduct = await productModel.getProductById(req.params.id);
+    const originalUrls = currentProduct?.image_urls || [];
 
+    // Parse the remaining old images array sent from the client-side panel
+    let currentUrls = [];
+    if (body.existingImages !== undefined) {
+      try {
+        currentUrls = typeof body.existingImages === 'string'
+          ? JSON.parse(body.existingImages)
+          : body.existingImages;
+      } catch (e) {
+        currentUrls = [];
+      }
+    }
+
+    // --- PROCESS BRAND NEW FILE ATTACHMENTS IF ANY ---
+    if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.jpg`;
         const filePath = `products/${fileName}`;
@@ -158,13 +168,42 @@ async function updateProduct(req, res) {
           .from("product-images")
           .getPublicUrl(filePath);
 
-        processedUrls.push(publicUrl);
+        currentUrls.push(publicUrl);
       }
-
-      updates.image_urls = processedUrls; // Matches your Postgres database column layout perfectly!
     }
 
-    // Send only the valid column fields to updateProduct
+    // 🚀 2. STORAGE CLEANUP LOGIC: Find which images were explicitly removed by the user
+    if (body.existingImages !== undefined) {
+      const imagesToRemove = originalUrls.filter(url => !currentUrls.includes(url));
+
+      if (imagesToRemove.length > 0) {
+        // Convert the full public URLs back into relative Supabase storage paths (e.g., "products/filename.jpg")
+        const pathsToDelete = imagesToRemove.map(url => {
+          const parts = url.split("/product-images/");
+          return parts.length > 1 ? parts[1] : null;
+        }).filter(Boolean);
+
+        if (pathsToDelete.length > 0) {
+          // Tell Supabase to permanently wipe these specific file paths from the bucket
+          const { error: deleteError } = await supabaseAdmin
+            .storage
+            .from("product-images")
+            .remove(pathsToDelete);
+
+          if (deleteError) {
+            console.error("Failed to delete orphaned images from Supabase Storage:", deleteError.message);
+            // We log the error but don't stop the request so the user's text changes still save successfully!
+          } else {
+            console.log(`Successfully cleaned up ${pathsToDelete.length} unused image(s) from storage.`);
+          }
+        }
+      }
+    }
+
+    if (body.existingImages !== undefined || (req.files && req.files.length > 0)) {
+      updates.image_urls = currentUrls;
+    }
+
     const product = await productModel.updateProduct(req.params.id, updates, variantsArray);
 
     res.json({ message: "Product updated successfully.", product });

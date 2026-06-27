@@ -117,6 +117,78 @@ textarea {
   margin-bottom: 6px;
 }
 
+/* --- IMAGE PREVIEW INTERFACES --- */
+.image-preview-container {
+  display: none;
+  margin-bottom: 20px;
+  border: 1px dashed var(--surface-border);
+  padding: 12px;
+  border-radius: var(--radius);
+  background: rgba(20, 22, 31, 0.6);
+}
+
+.image-preview-container.new-upload-box {
+  border-color: var(--accent-soft, #4a90e2);
+  background: rgba(74, 144, 226, 0.04);
+}
+
+.image-preview-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.image-preview-container.new-upload-box label {
+  color: var(--accent-soft, #4a90e2);
+}
+
+.image-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-thumb-box {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #14161f;
+}
+
+.image-preview-container.new-upload-box .preview-thumb-box {
+  border-color: var(--accent-soft, #4a90e2);
+}
+
+.preview-thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-old-img-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: var(--error);
+  color: #fff;
+  border: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-weight: bold;
+}
+
+/* --- PRODUCT ITEMS TABLE VIEW --- */
 .product-list-item {
   display: flex;
   justify-content: space-between;
@@ -127,6 +199,31 @@ textarea {
 }
 
 .product-list-item:last-child { border-bottom: none; }
+
+.product-list-item-left {
+  display: flex;
+  align-items: center;
+}
+
+.product-list-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #14161f;
+  border: 1px solid var(--surface-border);
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.product-list-thumb.no-img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+}
 
 .product-list-item .meta { flex: 1; min-width: 0; }
 

@@ -14,6 +14,9 @@ const formHeading = document.getElementById("formHeading");
 const cancelEditLink = document.getElementById("cancelEditLink");
 let editingProductId = null;
 let cachedProductsList = []; // Keeps track of products local data to prefill faster
+
+// Tracks surviving image links during an active product edit session
+let activeFormImagesArray = []; 
 // -------------------------------
 
 let variantCounter = 0;
@@ -57,13 +60,58 @@ async function loadCategoriesIntoSelect() {
   }
 }
 
+// Renders visual image swatches with quick-delete badges in your form
+function renderExistingImagesManager() {
+  const container = document.getElementById("existingImagesContainer");
+  const grid = document.getElementById("existingImagesGrid");
+  
+  if (!container || !grid) return;
+
+  if (activeFormImagesArray.length === 0) {
+    container.style.display = "none";
+    grid.innerHTML = "";
+    return;
+  }
+  
+  container.style.display = "block";
+  grid.innerHTML = activeFormImagesArray
+    .map((url, idx) => `
+      <div class="preview-thumb-box">
+        <img src="${url}" />
+        <button type="button" data-idx="${idx}" class="remove-old-img-btn">✕</button>
+      </div>
+    `).join("");
+
+  grid.querySelectorAll(".remove-old-img-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const indexToRemove = Number(btn.dataset.idx);
+      activeFormImagesArray.splice(indexToRemove, 1); // Delete image locally
+      renderExistingImagesManager(); // Re-render preview panel layout
+    });
+  });
+}
+
 // Switches form back and forth between Add Mode and Edit Mode
 function resetFormState() {
   editingProductId = null;
+  activeFormImagesArray = []; // Reset tracked images collection vector
   productForm.reset();
   formHeading.textContent = "Add a new product";
   submitBtn.textContent = "Create product";
   cancelEditLink.style.display = "none";
+  
+  // Hide image preview elements on reset via clean class hooks
+  const container = document.getElementById("existingImagesContainer");
+  const grid = document.getElementById("existingImagesGrid");
+  if (container) container.style.display = "none";
+  if (grid) grid.innerHTML = "";
+
+  // Hide and clear new local image thumbnails on reset
+  const newContainer = document.getElementById("newImagesPreviewContainer");
+  const newGrid = document.getElementById("newImagesPreviewGrid");
+  if (newContainer) newContainer.style.display = "none";
+  if (newGrid) newGrid.innerHTML = "";
+
   document.getElementById("productImages").required = true; // Images are only mandatory for new products
   variantRows.innerHTML = "";
   addVariantRow();
@@ -95,6 +143,10 @@ function enterEditMode(productId) {
   document.getElementById("gender").value = product.gender || "unisex";
   categorySelect.value = product.category_id || "";
 
+  // Read the current image URLs array from cached product database state
+  activeFormImagesArray = product.image_urls ? [...product.image_urls] : [];
+  renderExistingImagesManager();
+
   // Clear and prefill variant entries 
   variantRows.innerHTML = "";
   const variants = product.product_variants || [];
@@ -125,13 +177,19 @@ productForm.addEventListener("submit", async (e) => {
   const variantsArray = collectVariants();
   formData.append("variants", JSON.stringify(variantsArray));
 
+  // If editing, send down whatever image selection survived the visual layout management panel
+  if (editingProductId) {
+    formData.append("existingImages", JSON.stringify(activeFormImagesArray));
+  }
+
   // 3. Check for any brand new uploaded files
   const imageInput = document.getElementById("productImages");
   if (imageInput && imageInput.files.length > 0) {
     for (let i = 0; i < imageInput.files.length; i++) {
       formData.append("images", imageInput.files[i]);
     }
-  } else if (!editingProductId) {
+  } else if (!editingProductId && activeFormImagesArray.length === 0) {
+    // block submission if it's a new product with zero attachments selected
     showMessage(formMsg, "Please select at least one image file.", "error");
     submitBtn.disabled = false;
     return;
@@ -171,7 +229,7 @@ productForm.addEventListener("submit", async (e) => {
   }
 });
 
-// FIXED: Sends structural data updates safely using standard FormData mapping to protect backend column processors
+// Sends structural data updates safely using standard FormData mapping to protect backend column processors
 async function toggleActive(id, makeActive) {
   try {
     const formData = new FormData();
@@ -217,15 +275,14 @@ async function loadProductList() {
         const totalStock = (p.product_variants || []).reduce((s, v) => s + (v.stock_quantity || 0), 0);
         
         const firstImage = (p.image_urls && p.image_urls.length > 0) ? p.image_urls[0] : null;
-        const imgStyle = "width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #eee; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; text-align: center; flex-shrink: 0;";
         
         const imageElement = firstImage 
-          ? `<img src="${firstImage}" style="${imgStyle}" alt="${p.name}" />`
-          : `<div style="${imgStyle}">No Image</div>`;
+          ? `<img src="${firstImage}" class="product-list-thumb" alt="${p.name}" />`
+          : `<div class="product-list-thumb no-img-placeholder">No Image</div>`;
 
         return `
-          <div class="product-list-item" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 10px; border-bottom: 1px solid #eee;">
-            <div style="display: flex; align-items: center;">
+          <div class="product-list-item">
+            <div class="product-list-item-left">
               ${imageElement}
               
               <div class="meta">
@@ -233,11 +290,11 @@ async function loadProductList() {
                   <strong>${p.name}</strong>
                   <span class="badge ${p.is_active ? "active" : "inactive"}">${p.is_active ? "Active" : "Inactive"}</span>
                 </div>
-                <div class="sub" style="font-size: 0.85rem; color: #666;">₹${p.price} · ${p.category ? p.category.name : "Uncategorized"} · ${totalStock} total stock</div>
+                <div class="sub">₹${p.price} · ${p.category ? p.category.name : "Uncategorized"} · ${totalStock} total stock</div>
               </div>
             </div>
             
-            <div class="row-actions" style="display: flex; gap: 6px;">
+            <div class="row-actions">
               <button class="btn-secondary edit-btn" data-edit="${p.id}">Edit</button>
               <button class="btn-secondary toggle-btn" data-toggle="${p.id}" data-active="${p.is_active}">
                 ${p.is_active ? "Deactivate" : "Activate"}
@@ -275,6 +332,40 @@ logoutLink.addEventListener("click", async (e) => {
   } catch (_) { }
   clearToken();
   window.location.href = "/login.html";
+});
+
+// Live local preview generation for brand-new file selections
+document.getElementById("productImages").addEventListener("change", function(e) {
+  const container = document.getElementById("newImagesPreviewContainer");
+  const grid = document.getElementById("newImagesPreviewGrid");
+  
+  if (!container || !grid) return;
+  
+  grid.innerHTML = ""; // Clear out old preview thumbnails
+  
+  const files = e.target.files;
+  if (!files || files.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+  
+  container.style.display = "block";
+  
+  // Loop through all newly selected files and render an instantaneous object preview
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith("image/")) return; // Skip if somehow not an image
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const imgWrapper = document.createElement("div");
+      imgWrapper.className = "preview-thumb-box";
+      imgWrapper.innerHTML = `
+        <img src="${event.target.result}" title="${file.name}" />
+      `;
+      grid.appendChild(imgWrapper);
+    };
+    reader.readAsDataURL(file);
+  });
 });
 
 async function init() {
