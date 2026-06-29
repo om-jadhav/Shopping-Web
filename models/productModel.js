@@ -81,6 +81,20 @@ async function updateProduct(id, updates) {
   if (error) throw error;
   return data;
 }
+async function updateProductStatus(id, isActive) {
+  const { data, error } = await supabaseAdmin
+    .from("products")
+    .update({
+      is_active: isActive,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
 
 async function deleteProduct(id) {
   const { error } = await supabaseAdmin.from("products").delete().eq("id", id);
@@ -102,6 +116,7 @@ module.exports = {
   getAllProducts,
   getAllProductsForAdmin,
   getProductById,
+  updateProductStatus,
   createProduct,
   updateProduct,
   deleteProduct,

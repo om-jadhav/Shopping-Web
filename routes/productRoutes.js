@@ -26,7 +26,12 @@ router.get("/:id", productController.getProduct);
 
 // 3. Inject upload.array("images", 10) here. 
 router.post("/", requireAuth, requireAdmin, upload.array("images", 10), productController.createProduct);
-
+router.patch(
+  "/:id/status",
+  requireAuth,
+  requireAdmin,
+  productController.updateProductStatus
+);
 router.put("/:id", requireAuth, requireAdmin, upload.array("images", 10), productController.updateProduct);router.delete("/:id", requireAuth, requireAdmin, productController.deleteProduct);
 
 module.exports = router;

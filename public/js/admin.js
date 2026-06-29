@@ -229,20 +229,29 @@ productForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Sends structural data updates safely using standard FormData mapping to protect backend column processors
 async function toggleActive(id, makeActive) {
   try {
-    const formData = new FormData();
-    formData.append("isActive", makeActive);
-
-    await fetch(`/api/products/${id}`, {
-      method: "PUT",
-      headers: { "Authorization": `Bearer ${token}` },
-      body: formData,
+    const res = await fetch(`/api/products/${id}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        isActive: makeActive,
+      }),
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error);
+    }
+
     loadProductList();
+
   } catch (err) {
-    alert("Could not update product status: " + err.message);
+    alert(err.message);
   }
 }
 

@@ -107,13 +107,13 @@ async function updateProduct(req, res) {
     const body = req.body;
     const updates = {};
     let variantsArray = null;
-
+   
     if (body.name !== undefined) updates.name = body.name;
     if (body.description !== undefined) updates.description = body.description;
     if (body.brand !== undefined) updates.brand = body.brand;
     if (body.gender !== undefined) updates.gender = body.gender;
     if (body.price !== undefined) updates.price = body.price;
-    if (body.isActive !== undefined) updates.is_active = body.isActive;
+    
     if (body.categoryId !== undefined) updates.category_id = body.categoryId;
 
     if (typeof body.variants === 'string') {
@@ -125,7 +125,8 @@ async function updateProduct(req, res) {
     }
 
     // 1. Fetch the product's current database state BEFORE applying updates
-    const currentProduct = await productModel.getProductById(req.params.id);
+    const currentProduct =
+await productModel.getProductById(req.params.id);
     const originalUrls = currentProduct?.image_urls || [];
 
     // Parse the remaining old images array sent from the client-side panel
@@ -212,7 +213,33 @@ async function updateProduct(req, res) {
     res.status(400).json({ error: err.message });
   }
 }
+async function updateProductStatus(req, res) {
+  try {
+    const { isActive } = req.body;
 
+    if (typeof isActive === "undefined") {
+      return res.status(400).json({
+        error: "isActive is required."
+      });
+    }
+
+    const product = await productModel.updateProductStatus(
+      req.params.id,
+      isActive === true || isActive === "true"
+    );
+
+    res.json({
+      message: `Product ${product.is_active ? "activated" : "deactivated"} successfully.`,
+      product,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({
+      error: err.message,
+    });
+  }
+}
 // DELETE /api/products/:id (admin only)
 async function deleteProduct(req, res) {
   try {
@@ -223,4 +250,12 @@ async function deleteProduct(req, res) {
   }
 }
 
-module.exports = { listProducts, listProductsAdmin, getProduct, createProduct, updateProduct, deleteProduct };
+module.exports = {
+  listProducts,
+  listProductsAdmin,
+  getProduct,
+  createProduct,
+  updateProduct,
+  updateProductStatus,
+  deleteProduct
+};
