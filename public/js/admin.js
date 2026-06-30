@@ -353,8 +353,15 @@ document.getElementById("productImages").addEventListener("change", function (e)
 
   if (!container || !grid) return;
 
-  // Save newly selected files to our tracking array
-  selectedNewFilesArray = Array.from(e.target.files);
+  // 🚀 FIX: Append the newly selected files instead of overwriting the array
+  const newlyPickedFiles = Array.from(e.target.files);
+  selectedNewFilesArray = selectedNewFilesArray.concat(newlyPickedFiles);
+
+  // 🚀 FIX: Sync our master array back to the actual HTML input container
+  // This keeps the underlying form input aligned with your queue!
+  const dataTransfer = new DataTransfer();
+  selectedNewFilesArray.forEach(f => dataTransfer.items.add(f));
+  this.files = dataTransfer.files;
 
   renderNewImagesPreview();
 });
