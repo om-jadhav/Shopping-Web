@@ -16,7 +16,7 @@ let editingProductId = null;
 let cachedProductsList = []; // Keeps track of products local data to prefill faster
 
 // Tracks surviving image links during an active product edit session
-let activeFormImagesArray = []; 
+let activeFormImagesArray = [];
 // -------------------------------
 
 let variantCounter = 0;
@@ -64,7 +64,7 @@ async function loadCategoriesIntoSelect() {
 function renderExistingImagesManager() {
   const container = document.getElementById("existingImagesContainer");
   const grid = document.getElementById("existingImagesGrid");
-  
+
   if (!container || !grid) return;
 
   if (activeFormImagesArray.length === 0) {
@@ -72,7 +72,7 @@ function renderExistingImagesManager() {
     grid.innerHTML = "";
     return;
   }
-  
+
   container.style.display = "block";
   grid.innerHTML = activeFormImagesArray
     .map((url, idx) => `
@@ -99,7 +99,7 @@ function resetFormState() {
   formHeading.textContent = "Add a new product";
   submitBtn.textContent = "Create product";
   cancelEditLink.style.display = "none";
-  
+
   // Hide image preview elements on reset via clean class hooks
   const container = document.getElementById("existingImagesContainer");
   const grid = document.getElementById("existingImagesGrid");
@@ -272,7 +272,7 @@ async function deleteProduct(id, name) {
 async function loadProductList() {
   try {
     const data = await apiGet("/products/admin/all", token);
-    cachedProductsList = data.products || []; 
+    cachedProductsList = data.products || [];
 
     if (!cachedProductsList.length) {
       productList.innerHTML = `<p class="stock-note">No products yet - add one above.</p>`;
@@ -282,10 +282,10 @@ async function loadProductList() {
     productList.innerHTML = cachedProductsList
       .map((p) => {
         const totalStock = (p.product_variants || []).reduce((s, v) => s + (v.stock_quantity || 0), 0);
-        
+
         const firstImage = (p.image_urls && p.image_urls.length > 0) ? p.image_urls[0] : null;
-        
-        const imageElement = firstImage 
+
+        const imageElement = firstImage
           ? `<img src="${firstImage}" class="product-list-thumb" alt="${p.name}" />`
           : `<div class="product-list-thumb no-img-placeholder">No Image</div>`;
 
@@ -344,38 +344,70 @@ logoutLink.addEventListener("click", async (e) => {
 });
 
 // Live local preview generation for brand-new file selections
-document.getElementById("productImages").addEventListener("change", function(e) {
+// Track newly selected files in a state array
+let selectedNewFilesArray = [];
+
+document.getElementById("productImages").addEventListener("change", function (e) {
   const container = document.getElementById("newImagesPreviewContainer");
   const grid = document.getElementById("newImagesPreviewGrid");
-  
+
   if (!container || !grid) return;
-  
-  grid.innerHTML = ""; // Clear out old preview thumbnails
-  
-  const files = e.target.files;
-  if (!files || files.length === 0) {
+
+  // Save newly selected files to our tracking array
+  selectedNewFilesArray = Array.from(e.target.files);
+
+  renderNewImagesPreview();
+});
+
+// Dedicated function to render new local selections with individual cancel buttons
+function renderNewImagesPreview() {
+  const container = document.getElementById("newImagesPreviewContainer");
+  const grid = document.getElementById("newImagesPreviewGrid");
+  const imageInput = document.getElementById("productImages");
+
+  grid.innerHTML = ""; // Clear current grid view
+
+  if (selectedNewFilesArray.length === 0) {
     container.style.display = "none";
+    imageInput.value = ""; // Clear input completely if empty
     return;
   }
-  
+
   container.style.display = "block";
-  
-  // Loop through all newly selected files and render an instantaneous object preview
-  Array.from(files).forEach(file => {
-    if (!file.type.startsWith("image/")) return; // Skip if somehow not an image
-    
+
+  selectedNewFilesArray.forEach((file, idx) => {
+    if (!file.type.startsWith("image/")) return;
+
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
       const imgWrapper = document.createElement("div");
       imgWrapper.className = "preview-thumb-box";
       imgWrapper.innerHTML = `
         <img src="${event.target.result}" title="${file.name}" />
+        <button type="button" data-idx="${idx}" class="remove-new-img-btn">✕</button>
       `;
+
+      // Wire up individual cancel event safely using data attributes
+      imgWrapper.querySelector(".remove-new-img-btn").addEventListener("click", function () {
+        const indexToRemove = Number(this.dataset.idx);
+
+        // Remove from tracking array
+        selectedNewFilesArray.splice(indexToRemove, 1);
+
+        // Sync back to the actual HTML input using DataTransfer
+        const dataTransfer = new DataTransfer();
+        selectedNewFilesArray.forEach(f => dataTransfer.items.add(f));
+        imageInput.files = dataTransfer.files;
+
+        // Re-render the updated layout
+        renderNewImagesPreview();
+      });
+
       grid.appendChild(imgWrapper);
     };
     reader.readAsDataURL(file);
   });
-});
+}
 
 async function init() {
   if (!token) {
