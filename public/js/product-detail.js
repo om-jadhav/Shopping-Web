@@ -35,6 +35,10 @@ function renderProduct(product) {
   let selectedSize = sizes[0] || null;
   let selectedColor = colors[0] || null;
 
+  // Track which image index is currently selected/active in the gallery previewer
+  const imagesArray = product.image_urls || [];
+  let activeImageIndex = 0;
+
   function currentStockHtml() {
     if (!variants.length) {
       return `<p class="stock-note">Stock info not set up for this product yet.</p>`;
@@ -84,10 +88,38 @@ function renderProduct(product) {
     `;
   }
 
+  // Generates thumbnail previews below the main image if there are multiple pictures
+  function galleryThumbnailsHtml() {
+    if (imagesArray.length <= 1) return "";
+    return `
+      <div class="gallery-thumbnails" style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto;">
+        ${imagesArray
+          .map((url, idx) => {
+            const isSelected = idx === activeImageIndex;
+            const borderStyle = isSelected ? "2px solid #000" : "1px solid #ddd";
+            return `
+              <img 
+                src="${url}" 
+                class="thumb-img" 
+                data-index="${idx}" 
+                style="width: 60px; height: 60px; object-fit: cover; cursor: pointer; border-radius: 4px; border: ${borderStyle}; opacity: ${isSelected ? "1" : "0.6"}; transition: all 0.2s;"
+              />
+            `;
+          })
+          .join("")}
+      </div>
+    `;
+  }
+
   function render() {
+    const mainImage = imagesArray[activeImageIndex] || null;
+
     content.innerHTML = `
-      <div class="detail-img">
-        ${product.image_url ? `<img src="${product.image_url}" alt="${product.name}" />` : "No image"}
+      <div class="detail-img-container">
+        <div class="detail-img">
+          ${mainImage ? `<img src="${mainImage}" alt="${product.name}" id="mainDisplayImage" />` : '<div class="no-image-placeholder">No image</div>'}
+        </div>
+        ${galleryThumbnailsHtml()}
       </div>
       <div class="detail-info">
         <a class="back-link" href="/products.html">&larr; Back to shop</a>
@@ -101,12 +133,21 @@ function renderProduct(product) {
       </div>
     `;
 
+    // Bind event dynamic gallery click listener managers
+    document.querySelectorAll(".thumb-img").forEach((el) => {
+      el.addEventListener("click", () => {
+        activeImageIndex = Number(el.dataset.index);
+        render(); // Re-render to update the large image display preview panel
+      });
+    });
+
     document.querySelectorAll("#sizeSwatches .swatch").forEach((el) => {
       el.addEventListener("click", () => {
         selectedSize = el.dataset.size;
         render();
       });
     });
+
     document.querySelectorAll("#colorSwatches .swatch").forEach((el) => {
       el.addEventListener("click", () => {
         selectedColor = el.dataset.color;

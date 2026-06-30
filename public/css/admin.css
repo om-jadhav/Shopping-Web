@@ -30,7 +30,9 @@ body.page-admin {
   margin-left: 16px;
 }
 
-.admin-header .links a:hover { color: var(--accent-soft); }
+.admin-header .links a:hover {
+  color: var(--accent-soft);
+}
 
 .panel {
   background: var(--surface);
@@ -84,7 +86,9 @@ textarea {
   align-items: center;
 }
 
-.variant-row input { margin: 0; }
+.variant-row input {
+  margin: 0;
+}
 
 .remove-variant {
   width: 32px;
@@ -117,6 +121,86 @@ textarea {
   margin-bottom: 6px;
 }
 
+/* --- IMAGE PREVIEW INTERFACES --- */
+.image-preview-container {
+  display: none;
+  margin-bottom: 20px;
+  border: 1px dashed var(--surface-border);
+  padding: 12px;
+  border-radius: var(--radius);
+  background: rgba(20, 22, 31, 0.6);
+}
+
+.image-preview-container.new-upload-box {
+  border-color: var(--accent-soft, #4a90e2);
+  background: rgba(74, 144, 226, 0.04);
+}
+
+.image-preview-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.image-preview-container.new-upload-box label {
+  color: var(--accent-soft, #4a90e2);
+}
+
+.image-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-thumb-box {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #14161f;
+}
+
+.image-preview-container.new-upload-box .preview-thumb-box {
+  border-color: var(--accent-soft, #4a90e2);
+}
+
+.preview-thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 🚀 FIX: Combine both old and new cancel buttons so they both inherit the style */
+.remove-new-img-btn,
+.remove-old-img-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: var(--error, #ff4d4d);
+  color: #fff;
+  border: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.remove-new-img-btn:hover,
+.remove-old-img-btn:hover {
+  background: #cc0000;
+}
+
+/* --- PRODUCT ITEMS TABLE VIEW --- */
 .product-list-item {
   display: flex;
   justify-content: space-between;
@@ -126,9 +210,39 @@ textarea {
   gap: 14px;
 }
 
-.product-list-item:last-child { border-bottom: none; }
+.product-list-item:last-child {
+  border-bottom: none;
+}
 
-.product-list-item .meta { flex: 1; min-width: 0; }
+.product-list-item-left {
+  display: flex;
+  align-items: center;
+}
+
+.product-list-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #14161f;
+  border: 1px solid var(--surface-border);
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.product-list-thumb.no-img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.product-list-item .meta {
+  flex: 1;
+  min-width: 0;
+}
 
 .product-list-item .meta .name {
   font-weight: 500;
@@ -148,10 +262,21 @@ textarea {
   margin-left: 8px;
 }
 
-.badge.active { background: rgba(107, 220, 156, 0.15); color: var(--success); }
-.badge.inactive { background: rgba(255, 107, 107, 0.15); color: var(--error); }
+.badge.active {
+  background: rgba(107, 220, 156, 0.15);
+  color: var(--success);
+}
 
-.row-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.badge.inactive {
+  background: rgba(255, 107, 107, 0.15);
+  color: var(--error);
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
 .row-actions button {
   width: auto;
