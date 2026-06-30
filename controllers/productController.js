@@ -107,13 +107,13 @@ async function updateProduct(req, res) {
     const body = req.body;
     const updates = {};
     let variantsArray = null;
-   
+
     if (body.name !== undefined) updates.name = body.name;
     if (body.description !== undefined) updates.description = body.description;
     if (body.brand !== undefined) updates.brand = body.brand;
     if (body.gender !== undefined) updates.gender = body.gender;
     if (body.price !== undefined) updates.price = body.price;
-    
+
     if (body.categoryId !== undefined) updates.category_id = body.categoryId;
 
     if (typeof body.variants === 'string') {
@@ -126,7 +126,7 @@ async function updateProduct(req, res) {
 
     // 1. Fetch the product's current database state BEFORE applying updates
     const currentProduct =
-await productModel.getProductById(req.params.id);
+      await productModel.getProductById(req.params.id);
     const originalUrls = currentProduct?.image_urls || [];
 
     // Parse the remaining old images array sent from the client-side panel
@@ -205,8 +205,37 @@ await productModel.getProductById(req.params.id);
       updates.image_urls = currentUrls;
     }
 
-    const product = await productModel.updateProduct(req.params.id, updates, variantsArray);
+    // --- 🚀 UPGRADE: UPDATE PRODUCT & SYNC VARIANTS ---
+    // 1. Update the main product details first
+    const product = await productModel.updateProduct(req.params.id, updates);
 
+    if (variantsArray !== null) {
+      // 2. Clear out any old variants for this specific product ID
+      await supabaseAdmin
+        .from("product_variants")
+        .delete()
+        .eq("product_id", req.params.id);
+
+      // 3. If there are fresh/edited variants, insert them into the blank slate
+      if (variantsArray.length > 0) {
+        const variantsToInsert = variantsArray.map(v => ({
+          product_id: req.params.id,
+          size: v.size || null,
+          color: v.color || null,
+          stock_quantity: v.stockQuantity !== undefined ? v.stockQuantity : (v.stock_quantity || 0)
+        }));
+
+        const { error: variantError } = await supabaseAdmin
+          .from("product_variants")
+          .insert(variantsToInsert);
+
+        if (variantError) {
+          throw new Error(`Failed to update product variants: ${variantError.message}`);
+        }
+      }
+    }
+
+    // 4. Return the successful response back to admin.js
     res.json({ message: "Product updated successfully.", product });
   } catch (err) {
     console.error("Error updating product:", err);
