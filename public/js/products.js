@@ -30,20 +30,51 @@ function renderProducts(products) {
         0
       );
       const outOfStock = totalStock === 0 && (p.product_variants || []).length > 0;
-
-      // 🚀 FIXED: Grab the first image link from your new database array structure
       const firstImage = (p.image_urls && p.image_urls.length > 0) ? p.image_urls[0] : null;
 
+      // 🕒 TIME-BASED AUTO EXPIRY ENGINE
+      let offerValid = false;
+      const pct = parseInt(p.offer_percentage, 10);
+      
+      if (pct > 0 && pct <= 100) {
+        // If there's an end date, evaluate it against the current live clock
+        if (p.end_date || p.offer_end_date) {
+          const expiryTime = new Date(p.end_date || p.offer_end_date);
+          if (expiryTime > new Date()) {
+            offerValid = true;
+          }
+        } else {
+          // If no end date was chosen (optional), it remains valid until manually removed
+          offerValid = true;
+        }
+      }
+
+      // Calculate dynamic discount HTML values
+      let priceHtml = `<div class="price">₹${p.price}</div>`;
+      let offerBadgeHtml = "";
+
+      if (offerValid) {
+        const discountedPrice = Math.round(p.price * (1 - pct / 100));
+        priceHtml = `
+          <div class="price-container" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="sale-price" style="color: var(--accent, #ff7a52); font-weight: 700;">₹${discountedPrice}</span>
+            <span class="original-price" style="color: var(--muted, #9aa0ad); text-decoration: line-through; font-size: 0.85rem;">₹${p.price}</span>
+          </div>
+        `;
+        offerBadgeHtml = `<span class="shop-offer-tag" style="position: absolute; top: 8px; right: 8px; background: var(--error, #ff6b6b); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; z-index: 5;">${pct}% OFF</span>`;
+      }
+
       return `
-        <a class="product-card" href="/product-detail.html?id=${p.id}">
+        <a class="product-card" href="/product-detail.html?id=${p.id}" style="position: relative;">
+          ${offerBadgeHtml}
           <div class="img-box">
             ${firstImage ? `<img src="${firstImage}" alt="${p.name}" />` : "No image"}
           </div>
           <div class="info">
-            <div class="cat-label">${p.category ? p.category.name : "Uncategorized"}</div>
+            <div class="cat-label">${p.category ? (typeof p.category === 'object' ? p.category.name : p.category) : "Uncategorized"}</div>
             <h3>${p.name}</h3>
-            <div class="price">₹${p.price}</div>
-            ${outOfStock ? '<div class="stock-note">Out of stock</div>' : ""}
+            ${priceHtml}
+            ${outOfStock ? '<div class="stock-note" style="margin-top: 6px;">Out of stock</div>' : ""}
           </div>
         </a>
       `;
