@@ -8,7 +8,50 @@ async function listProducts(req, res) {
   try {
     const { category, gender, search } = req.query;
     const products = await productModel.getAllProducts({ category, gender, search });
-    res.json({ products });
+
+    const normalizedProducts = Array.isArray(products)
+      ? products.map((p) => ({
+          ...p,
+          id: p.id || p._id,
+          _id: p._id || p.id,
+          image_urls: p.image_urls || p.imageUrls || [],
+          product_variants: p.product_variants || p.variants || [],
+        }))
+      : products;
+
+    const offerIds = Array.isArray(normalizedProducts)
+      ? [...new Set(normalizedProducts.filter((p) => p.offer_id != null).map((p) => p.offer_id))]
+      : [];
+
+    let offersById = new Map();
+    if (offerIds.length > 0) {
+      const { data: offers, error } = await supabaseAdmin
+        .from("offers")
+        .select("*")
+        .in("id", offerIds);
+
+      if (error) throw error;
+      offersById = new Map((offers || []).map((offer) => [offer.id, offer]));
+    }
+
+    const productsWithOffer = Array.isArray(normalizedProducts)
+      ? normalizedProducts.map((p) => {
+          const offer = offersById.get(p.offer_id) || null;
+          const offerPct = Number(p.offer_percentage ?? offer?.percentage ?? 0);
+
+          return {
+            ...p,
+            offer_id: p.offer_id ?? offer?.id ?? null,
+            offer,
+            offers: offer,
+            offer_percentage: offerPct,
+            end_date: p.end_date ?? p.offer_end_date ?? offer?.end_date ?? null,
+            offer_end_date: p.offer_end_date ?? p.end_date ?? offer?.end_date ?? null,
+          };
+        })
+      : normalizedProducts;
+
+    res.json({ products: productsWithOffer });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

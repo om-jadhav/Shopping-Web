@@ -35,7 +35,11 @@ function renderProduct(product) {
   let selectedSize = sizes[0] || null;
   let selectedColor = colors[0] || null;
 
-  const imagesArray = product.image_urls || [];
+  const imagesArray =
+    product.image_urls ||
+    product.imageUrls ||
+    (product.image ? [product.image] : []);
+
   let activeImageIndex = 0;
 
   function currentStockHtml() {
@@ -114,8 +118,11 @@ function renderProduct(product) {
 
     // 🕒 EVALUATE LIVE PROMOTIONAL OFFER TIMESTAMPS
     let offerValid = false;
-    const pct = parseInt(product.offer_percentage, 10);
-    
+    const pct = parseInt(
+      product.offer_percentage ?? product.offer?.percentage ?? product.offers?.percentage ?? 0,
+      10
+    ) || 0;
+
     if (pct > 0 && pct <= 100) {
       if (product.end_date || product.offer_end_date) {
         const expiryTime = new Date(product.end_date || product.offer_end_date);
@@ -185,13 +192,13 @@ function renderProduct(product) {
 
 async function loadProduct() {
   const id = getProductIdFromUrl();
-  if (!id) {
+  if (!id || id === "undefined") {
     content.innerHTML = `<p class="empty-state">No product specified.</p>`;
     return;
   }
 
   try {
-    const data = await apiGet(`/products/${id}`);
+    const data = await apiGet(`/products/${encodeURIComponent(id)}`);
     renderProduct(data.product);
   } catch (err) {
     content.innerHTML = `<p class="empty-state">Could not load product: ${err.message}</p>`;

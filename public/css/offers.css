@@ -1,7 +1,7 @@
-/* public/css/offers.css */
+/* Import base styles */
 @import url('/css/style.css');
 
-/* Inherit the correct admin page spacing and layout setup */
+/* --- Page Layout --- */
 body {
   align-items: flex-start;
   padding-top: 70px;
@@ -33,59 +33,63 @@ body {
   margin-left: 16px;
 }
 
-.admin-header .links a:hover {
-  color: var(--accent-soft);
-}
-
-/* --- FORM & CONTROL PANEL --- */
-#offerForm {
-  margin-bottom: 30px;
-}
-
-.selection-toolbar {
+/* --- Utility/Structure Classes (Added to replace inline styles) --- */
+.form-row {
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.selection-area {
+  margin-top: 25px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.filter-group {
+  flex: 1;
+}
+
+.selection-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
   align-items: center;
-  margin: 15px 0 8px 0;
 }
 
-#selectionCount {
-  font-size: 0.85rem;
-  color: var(--muted);
-  font-weight: 500;
+.tip {
+  color: #888;
+  display: block;
+  margin-bottom: 10px;
 }
 
-.selection-actions {
+.hidden {
+  display: none;
+}
+
+#cancelEditBtn {
+  background: #f5f5f5;
+  color: #555;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.campaign-actions {
   display: flex;
   gap: 8px;
 }
 
-.message {
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  margin-top: 12px;
-  font-weight: 500;
-}
-
-.message.error {
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid var(--error);
-  color: var(--error);
-}
-
-.message.success {
-  background: rgba(46, 204, 113, 0.1);
-  border: 1px solid #2ecc71;
-  color: #2ecc71;
-}
-
-/* --- INVENTORY GRID AREA --- */
-#dragSelectWrapper {
-  position: relative;
-  width: 100%;
-}
-
+/* --- Inventory & Cards --- */
 .inventory-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -98,10 +102,8 @@ body {
   background: rgba(20, 22, 31, 0.6);
   border-radius: var(--radius);
   user-select: none;
-  -webkit-user-select: none;
 }
 
-/* --- SELECTABLE CARDS (Dark Theme Theme-Matched) --- */
 .inventory-card {
   background: var(--surface);
   border: 1px solid var(--surface-border);
@@ -113,123 +115,38 @@ body {
   transition: all 0.15s ease;
 }
 
-.inventory-card:hover {
-  border-color: var(--muted);
-  transform: translateY(-2px);
-}
-
-/* Selected state using your existing theme tokens */
 .inventory-card.selected {
   border-color: var(--accent);
   background-color: rgba(255, 122, 82, 0.08);
 }
 
-.inventory-card.selected::after {
-  content: "✓";
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: var(--accent);
-  color: #1a1108;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  font-size: 0.75rem;
-  line-height: 18px;
-  font-weight: bold;
-  z-index: 3;
-}
-
-/* --- THUMBNAILS & TEXT METADATA --- */
 .inventory-img {
   width: 100%;
   height: 110px;
   object-fit: cover;
   border-radius: 6px;
   margin-bottom: 8px;
-  background: #14161f;
-  border: 1px solid var(--surface-border);
 }
 
-.inventory-info {
-  text-align: left;
-  padding: 2px 4px;
-}
-
-.inventory-title {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.inventory-price {
-  color: var(--accent-soft);
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-top: 2px;
-}
-
-/* --- SALE BADGES MATCHING YOUR SYSTEM BADGES --- */
-.active-offer-badge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  background: rgba(255, 107, 107, 0.2);
-  color: var(--error);
-  border: 1px solid rgba(255, 107, 107, 0.4);
-  padding: 2px 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  border-radius: 4px;
-  z-index: 2;
-}
-
-/* --- SELECTION UTILITY BUTTONS --- */
-.sec-btn {
-  background: transparent;
-  border: 1px solid var(--surface-border);
-  color: var(--text);
-  padding: 7px 12px;
+.inventory-img-placeholder {
+  width: 100%;
+  height: 110px;
   border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.15s ease;
+  background: #1e212e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 0.7rem;
 }
 
-.sec-btn:hover {
-  border-color: var(--muted);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-/* --- ACTIVE CAMPAIGNS PANEL STYLES --- */
-.campaigns-section {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid var(--surface-border);
-}
-
-.campaigns-section h2 {
-  font-family: 'Fraunces', serif;
-  font-size: 1.4rem;
-  margin-bottom: 16px;
-}
-
+/* --- Campaigns --- */
 .campaign-card {
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 14px;
-  position: relative;
-  transition: border-color 0.15s ease;
-}
-
-.campaign-card:hover {
-  border-color: var(--muted);
 }
 
 .campaign-meta {
@@ -243,17 +160,6 @@ body {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 4px;
-}
-
-.campaign-date {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.campaign-summary {
-  font-size: 0.82rem;
-  color: var(--muted);
 }
 
 .campaign-count {
@@ -261,7 +167,6 @@ body {
   font-weight: 600;
 }
 
-/* Horizontal product array thumbnail row scroll */
 .campaign-products-inline {
   display: flex;
   gap: 10px;
@@ -270,49 +175,14 @@ body {
   margin-top: 10px;
 }
 
-/* Individual inline template items */
-.campaign-thumb-wrapper {
-  position: relative;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-}
-
-.thumb-img {
-  width: 44px;
-  height: 44px;
-  object-fit: cover;
-  border-radius: 6px;
+/* --- Buttons & UI --- */
+.sec-btn {
+  background: transparent;
   border: 1px solid var(--surface-border);
-  background: #14161f;
-}
-
-/* Absolute single product cross-cancellation badge */
-.remove-single-product-btn {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--surface-border);
   color: var(--text);
-  border: 1px solid var(--surface-border);
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  font-size: 0.65rem;
-  line-height: 12px;
-  text-align: center;
+  padding: 7px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  opacity: 0;
-  transition: all 0.15s ease;
-  z-index: 5;
-}
-
-.campaign-thumb-wrapper:hover .remove-single-product-btn {
-  opacity: 1;
-  background: var(--error);
-  border-color: var(--error);
-  color: #fff;
 }
 
 .delete-campaign-btn {
@@ -321,83 +191,36 @@ body {
   border: 1px solid rgba(255, 107, 107, 0.2);
   padding: 6px 12px;
   border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-.delete-campaign-btn:hover {
-  background: var(--error);
-  color: #fff;
-}
-
-/* --- CUSTOM CONTEXT POPUP --- */
-.context-menu {
-  position: absolute;
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  border-radius: 6px;
-  padding: 4px 0;
-  min-width: 160px;
-  z-index: 1000;
-  display: none;
-}
-
-.context-menu ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.context-menu li {
-  padding: 8px 14px;
+.message {
+  padding: 10px 14px;
+  border-radius: var(--radius);
   font-size: 0.85rem;
-  color: var(--text);
-  cursor: pointer;
+  margin-top: 12px;
 }
 
-.context-menu li:hover {
-  background-color: var(--accent);
-  color: #1a1108;
-  font-weight: 500;
-}
-
-.loading-text {
-  color: var(--muted);
-  font-size: 0.9rem;
-  width: 100%;
-  text-align: center;
-  grid-column: 1 / -1;
-  padding: 20px 0;
-}
-
-/* Drag selection bounding canvas box framework */
-.drag-selection-box {
-  position: absolute;
-  background: rgba(255, 122, 82, 0.1);
-  border: 1.5px dashed var(--accent, #ff7a52);
-  border-radius: 3px;
+/* --- ADDED: DISABLED STATE --- */
+.inventory-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
   pointer-events: none;
-  z-index: 99;
-  display: none;
+  background: rgba(20, 22, 31, 0.3);
 }
 
-/* Styling for the horizontal scroll container */
-.campaign-products-inline {
-    scrollbar-width: thin; /* For Firefox */
-}
-
-/* Chrome/Safari scrollbar styling */
-.campaign-products-inline::-webkit-scrollbar {
-    height: 6px;
-}
-.campaign-products-inline::-webkit-scrollbar-thumb {
-    background-color: #cbd5e0;
-    border-radius: 3px;
-}
-
-/* Ensure individual thumbnails stay fixed width so they don't squish */
-.campaign-thumb-wrapper {
-    flex: 0 0 50px; 
+/* --- SALE BADGE --- */
+.active-offer-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(255, 122, 82, 0.9);
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
