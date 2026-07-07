@@ -224,3 +224,53 @@ body {
   pointer-events: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+/* ===========================================
+   CAMPAIGN STATUS & SUMMARY
+=========================================== */
+
+.campaign-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.campaign-status-wrapper {
+  margin-bottom: 4px;
+}
+
+.campaign-status {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Active */
+.status-active {
+  background: #2ecc71;
+}
+
+/* Upcoming */
+.status-upcoming {
+  background: #f39c12;
+}
+
+/* Expired */
+.status-expired {
+  background: #e74c3c;
+}
+
+.campaign-start,
+.campaign-end {
+  color: var(--text);
+}
+
+.campaign-count {
+  color: var(--accent);
+  font-weight: 600;
+}

@@ -178,6 +178,15 @@ function enterEditMode(camp) {
     currentEditId = camp.id;
     document.getElementById("offerName").value = camp.name;
     document.getElementById("discountPercentage").value = camp.percentage;
+    document.getElementById("startDate").value =
+        camp.start_date
+            ? new Date(camp.start_date).toISOString().slice(0, 16)
+            : "";
+
+    document.getElementById("endDate").value =
+        camp.end_date
+            ? new Date(camp.end_date).toISOString().slice(0, 16)
+            : "";
     selectedProductIds = new Set(camp.product_ids.map(String));
     updateUI();
     renderGrid();
@@ -195,10 +204,63 @@ async function loadOffers() {
         clone.querySelector(".campaign-title").textContent = `${camp.name} (${camp.percentage}% OFF)`;
         clone.querySelector(".campaign-count").textContent = `Linked: ${camp.productsList?.length || 0}`;
 
-        const endDate = camp.end_date ? new Date(camp.end_date.replace(' ', 'T')) : null;
-        clone.querySelector(".campaign-date").textContent = (endDate && !isNaN(endDate.getTime()))
-            ? endDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" })
-            : "No end date";
+        const now = new Date();
+
+        const startDate = camp.start_date
+            ? new Date(camp.start_date)
+            : null;
+
+        const endDate = camp.end_date
+            ? new Date(camp.end_date)
+            : null;
+
+        const formatDate = (date) =>
+            date
+                ? date.toLocaleString("en-IN", {
+                    timeZone: "Asia/Kolkata",
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                })
+                : "Not Set";
+
+        let status = "Upcoming";
+
+        if (startDate && endDate) {
+            if (now < startDate)
+                status = "Upcoming";
+            else if (now >= startDate && now <= endDate)
+                status = "Active";
+            else
+                status = "Expired";
+        }
+        else if (!startDate && endDate) {
+            status = now <= endDate ? "Active" : "Expired";
+        }
+        else {
+            status = "Active";
+        }
+
+        const statusEl = clone.querySelector(".campaign-status");
+
+        statusEl.textContent = status;
+
+        statusEl.classList.remove(
+            "status-active",
+            "status-upcoming",
+            "status-expired"
+        );
+
+        if (status === "Active") {
+            statusEl.classList.add("status-active");
+        }
+        else if (status === "Upcoming") {
+            statusEl.classList.add("status-upcoming");
+        }
+        else {
+            statusEl.classList.add("status-expired");
+        }
+        clone.querySelector(".campaign-start").textContent = formatDate(startDate);
+        clone.querySelector(".campaign-end").textContent = formatDate(endDate);
 
         clone.querySelector(".edit-campaign-btn").onclick = () => enterEditMode(camp);
         clone.querySelector(".delete-campaign-btn").onclick = async () => {
