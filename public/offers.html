@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Offers - Admin</title>
+    <link rel="stylesheet" href="css/offers.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Manage Offers & Discounts</h1>
+            <div class="links">
+                <a href="/admin.html">Manage Products</a>
+                <a href="/products.html">View Shop</a>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Create New Offer Campaign</h2>
+            <form id="offerForm">
+                <div class="form-group">
+                    <label for="offerName">Offer Name / Campaign Title</label>
+                    <input type="text" id="offerName" placeholder="e.g., Summer Splash Sale" required />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="discountPercentage">Discount Percentage (%)</label>
+                        <input type="number" id="discountPercentage" min="1" max="100" placeholder="e.g., 20"
+                            required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Start Date & Time (Optional)</label>
+                        <input type="datetime-local" id="startDate" />
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date & Time (Optional)</label>
+                        <input type="datetime-local" id="endDate" />
+                    </div>
+                </div>
+
+                <div class="form-group selection-area">
+                    <label>Apply Offer To:</label>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Filter Category</label>
+                            <select id="categoryFilter">
+                                <option value="all">All Categories</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Filter Gender</label>
+                            <select id="genderFilter">
+                                <option value="all">All Genders</option>
+                                <option value="men">Men</option>
+                                <option value="women">Women</option>
+                                <option value="unisex">Unisex</option>
+                                <option value="kids">Kids</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="selection-controls">
+                        <button type="button" id="selectAllBtn" class="sec-btn">Select All Filtered</button>
+                        <button type="button" id="clearSelectionBtn" class="sec-btn">Clear Selection</button>
+                        <span id="selectionCount">0 products selected</span>
+                    </div>
+
+                    <small class="tip">💡 <em>Tip: Click and drag to select multiple items!</em></small>
+
+                    <div id="dragSelectWrapper">
+                        <div id="inventoryGrid" class="inventory-grid">
+                            <p class="loading-text">Loading inventory products...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitOfferBtn">Create & Apply Offer</button>
+                <button type="button" id="cancelEditBtn" class="hidden">Cancel Edit</button>
+                <div id="offerFormMsg" class="message"></div>
+            </form>
+        </div>
+
+        <div class="panel campaigns-section">
+            <h2>Active & Upcoming Campaigns</h2>
+            <div id="activeOffersList">
+                <p class="loading-text">Loading active campaigns...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <template id="campaignItemTemplate">
+        <div class="campaign-card">
+            <div class="campaign-meta">
+                <div>
+                    <strong class="campaign-title"></strong>
+                    <div class="campaign-summary">
+
+                        <div class="campaign-status-wrapper">
+                            <span class="campaign-status"></span>
+                        </div>
+
+                        <div>
+                            <strong>Starts:</strong>
+                            <span class="campaign-start"></span>
+                        </div>
+
+                        <div>
+                            <strong>Ends:</strong>
+                            <span class="campaign-end"></span>
+                        </div>
+
+                        <div>
+                            <strong class="campaign-count"></strong>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="campaign-actions">
+                    <button class="edit-campaign-btn">Edit</button>
+                    <button class="delete-campaign-btn">End Offer</button>
+                </div>
+            </div>
+            <div class="campaign-products-inline"></div>
+        </div>
+    </template>
+
+    <script src="js/offers.js"></script>
+</body>
+
+</html>

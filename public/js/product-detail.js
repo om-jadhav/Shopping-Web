@@ -35,8 +35,11 @@ function renderProduct(product) {
   let selectedSize = sizes[0] || null;
   let selectedColor = colors[0] || null;
 
-  // Track which image index is currently selected/active in the gallery previewer
-  const imagesArray = product.image_urls || [];
+  const imagesArray =
+    product.image_urls ||
+    product.imageUrls ||
+    (product.image ? [product.image] : []);
+
   let activeImageIndex = 0;
 
   function currentStockHtml() {
@@ -88,7 +91,6 @@ function renderProduct(product) {
     `;
   }
 
-  // Generates thumbnail previews below the main image if there are multiple pictures
   function galleryThumbnailsHtml() {
     if (imagesArray.length <= 1) return "";
     return `
@@ -114,6 +116,36 @@ function renderProduct(product) {
   function render() {
     const mainImage = imagesArray[activeImageIndex] || null;
 
+    // 🕒 EVALUATE LIVE PROMOTIONAL OFFER TIMESTAMPS
+    let offerValid = false;
+    const pct = parseInt(
+      product.offer_percentage ?? product.offer?.percentage ?? product.offers?.percentage ?? 0,
+      10
+    ) || 0;
+
+    if (pct > 0 && pct <= 100) {
+      if (product.end_date || product.offer_end_date) {
+        const expiryTime = new Date(product.end_date || product.offer_end_date);
+        if (expiryTime > new Date()) {
+          offerValid = true;
+        }
+      } else {
+        offerValid = true;
+      }
+    }
+
+    let detailPriceHtml = `<div class="detail-price">₹${product.price}</div>`;
+    if (offerValid) {
+      const discountedPrice = Math.round(product.price * (1 - pct / 100));
+      detailPriceHtml = `
+        <div class="detail-price-container" style="margin-bottom: 16px; display: flex; align-items: baseline; gap: 10px;">
+          <span class="detail-sale-price" style="font-size: 1.4rem; color: var(--accent, #ff7a52); font-weight: 700;">₹${discountedPrice}</span>
+          <span class="detail-original-price" style="font-size: 1rem; color: var(--muted, #9aa0ad); text-decoration: line-through;">₹${product.price}</span>
+          <span style="font-size: 0.8rem; background: rgba(255,107,107,0.15); color: var(--error, #ff6b6b); padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-left: 4px;">${pct}% OFF</span>
+        </div>
+      `;
+    }
+
     content.innerHTML = `
       <div class="detail-img-container">
         <div class="detail-img">
@@ -123,9 +155,9 @@ function renderProduct(product) {
       </div>
       <div class="detail-info">
         <a class="back-link" href="/products.html">&larr; Back to shop</a>
-        <div class="cat-label">${product.category ? product.category.name : "Uncategorized"}</div>
+        <div class="cat-label">${product.category ? (typeof product.category === 'object' ? product.category.name : product.category) : "Uncategorized"}</div>
         <h1>${product.name}</h1>
-        <div class="detail-price">₹${product.price}</div>
+        ${detailPriceHtml}
         <p>${product.description || ""}</p>
         ${sizeSwatchesHtml()}
         ${colorSwatchesHtml()}
@@ -133,11 +165,10 @@ function renderProduct(product) {
       </div>
     `;
 
-    // Bind event dynamic gallery click listener managers
     document.querySelectorAll(".thumb-img").forEach((el) => {
       el.addEventListener("click", () => {
         activeImageIndex = Number(el.dataset.index);
-        render(); // Re-render to update the large image display preview panel
+        render();
       });
     });
 
@@ -161,13 +192,13 @@ function renderProduct(product) {
 
 async function loadProduct() {
   const id = getProductIdFromUrl();
-  if (!id) {
+  if (!id || id === "undefined") {
     content.innerHTML = `<p class="empty-state">No product specified.</p>`;
     return;
   }
 
   try {
-    const data = await apiGet(`/products/${id}`);
+    const data = await apiGet(`/products/${encodeURIComponent(id)}`);
     renderProduct(data.product);
   } catch (err) {
     content.innerHTML = `<p class="empty-state">Could not load product: ${err.message}</p>`;
