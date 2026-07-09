@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const offerRoutes = require("./routes/offerRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const offerController = require("./controllers/offerController");
 
 const app = express();
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/offers", offerRoutes);
+app.use("/api/profile", profileRoutes);
 
 // Simple health check - good way to confirm the server + env vars are alive
 app.get("/api/health", (req, res) => {

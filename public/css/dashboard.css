@@ -1,0 +1,182 @@
+/* ===========================
+   Dashboard Page
+=========================== */
+
+.dashboard {
+    max-width: 750px;
+    margin: 50px auto;
+    padding: 30px;
+}
+
+/* ===========================
+   Profile Completion Card
+=========================== */
+
+.profile-progress-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px;
+    margin: 25px 0;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50px;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg,#00d26a,#36ff91);
+    border-radius: 50px;
+    transition: width .4s ease;
+}
+
+.checklist{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    background:rgba(255,255,255,0.02);
+    border-radius:8px;
+    font-size:14px;
+    color:#ddd;
+}
+
+/* ===========================
+   Form
+=========================== */
+
+#profileForm{
+    margin-top:25px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    margin-bottom:18px;
+}
+
+.form-group label{
+    margin-bottom:8px;
+    font-weight:500;
+    color:#ddd;
+}
+
+.form-group input{
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,.15);
+    background:#1b1b1b;
+    color:#fff;
+    font-size:15px;
+    transition:.25s;
+}
+
+.form-group input:focus{
+    outline:none;
+    border-color:#00d26a;
+    box-shadow:0 0 0 3px rgba(0,210,106,.18);
+}
+
+.form-group input[readonly]{
+    opacity:.75;
+    cursor:not-allowed;
+}
+
+/* ===========================
+   Heading
+=========================== */
+
+h3{
+    margin:30px 0 15px;
+    font-size:20px;
+    color:#fff;
+}
+
+hr{
+    margin:25px 0;
+    border:none;
+    border-top:1px solid rgba(255,255,255,.08);
+}
+
+/* ===========================
+   Buttons
+=========================== */
+
+button[type="submit"]{
+    width:100%;
+    margin-top:10px;
+}
+
+.logout-btn{
+    width:100%;
+    margin-top:15px;
+    background:#c62828;
+}
+
+.logout-btn:hover{
+    background:#b71c1c;
+}
+
+/* ===========================
+   Messages
+=========================== */
+
+.message{
+    margin-top:18px;
+    padding:12px;
+    border-radius:8px;
+    text-align:center;
+    font-weight:500;
+}
+
+.message.success{
+    background:#173b26;
+    color:#7cffaa;
+    border:1px solid #2d7d52;
+}
+
+.message.error{
+    background:#401818;
+    color:#ff8b8b;
+    border:1px solid #b64b4b;
+}
+
+/* ===========================
+   Mobile
+=========================== */
+
+@media(max-width:768px){
+
+.dashboard{
+    padding:20px;
+    margin:20px;
+}
+
+.checklist{
+    grid-template-columns:1fr;
+}
+
+}
