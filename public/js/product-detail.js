@@ -1,6 +1,8 @@
 // public/js/product-detail.js
 const content = document.getElementById("content");
 
+let currentUserIsAdmin = false;
+
 function getProductIdFromUrl() {
   return new URLSearchParams(window.location.search).get("id");
 }
@@ -34,6 +36,7 @@ function renderProduct(product) {
 
   let selectedSize = sizes[0] || null;
   let selectedColor = colors[0] || null;
+  let quantity = 1;
 
   const imagesArray =
     product.image_urls ||
@@ -42,11 +45,16 @@ function renderProduct(product) {
 
   let activeImageIndex = 0;
 
+  function currentVariant() {
+    if (!variants.length) return null;
+    return findVariant(variants, selectedSize, selectedColor);
+  }
+
   function currentStockHtml() {
     if (!variants.length) {
       return `<p class="stock-note">Stock info not set up for this product yet.</p>`;
     }
-    const variant = findVariant(variants, selectedSize, selectedColor);
+    const variant = currentVariant();
     if (!variant) return `<p class="stock-note">This combination isn't available.</p>`;
     return variant.stock_quantity > 0
       ? `<p class="stock-note">${variant.stock_quantity} in stock</p>`
@@ -113,10 +121,34 @@ function renderProduct(product) {
     `;
   }
 
+  function addToCartSectionHtml() {
+    if (currentUserIsAdmin) return "";
+
+    const variant = currentVariant();
+    const outOfStock = variants.length > 0 && (!variant || variant.stock_quantity === 0);
+    const maxQty = variant ? variant.stock_quantity : 99;
+
+    return `
+      <div class="add-to-cart-section" style="margin-top: 20px; display: flex; gap: 10px; align-items: center;">
+        <input
+          type="number"
+          id="quantityInput"
+          value="${quantity}"
+          min="1"
+          max="${maxQty}"
+          style="width: 60px; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); background:#1b1b1b; color:#fff;"
+        />
+        <button id="addToCartBtn" ${outOfStock ? "disabled" : ""} style="flex: 1;">
+          ${outOfStock ? "Out of Stock" : "Add to Cart"}
+        </button>
+      </div>
+      <div id="cartMsg" class="message" style="display:none;"></div>
+    `;
+  }
+
   function render() {
     const mainImage = imagesArray[activeImageIndex] || null;
 
-    // 🕒 EVALUATE LIVE PROMOTIONAL OFFER TIMESTAMPS
     let offerValid = false;
     const pct = parseInt(
       product.offer_percentage ?? product.offer?.percentage ?? product.offers?.percentage ?? 0,
@@ -162,6 +194,7 @@ function renderProduct(product) {
         ${sizeSwatchesHtml()}
         ${colorSwatchesHtml()}
         ${currentStockHtml()}
+        ${addToCartSectionHtml()}
       </div>
     `;
 
@@ -185,9 +218,81 @@ function renderProduct(product) {
         render();
       });
     });
+
+    const qtyInput = document.getElementById("quantityInput");
+    if (qtyInput) {
+      qtyInput.addEventListener("change", () => {
+        const max = Number(qtyInput.max) || 99;
+        quantity = Math.min(max, Math.max(1, Number(qtyInput.value) || 1));
+        qtyInput.value = quantity;
+      });
+    }
+
+    const addBtn = document.getElementById("addToCartBtn");
+    if (addBtn) {
+      addBtn.addEventListener("click", () => handleAddToCart(product, variants, () => ({
+        selectedSize,
+        selectedColor,
+        quantity,
+      })));
+    }
   }
 
   render();
+}
+
+async function handleAddToCart(product, variants, getSelection) {
+  const token = getToken();
+  if (!token) {
+    window.location.href = "/login.html";
+    return;
+  }
+
+  const { selectedSize, selectedColor, quantity } = getSelection();
+  const cartMsg = document.getElementById("cartMsg");
+  const addBtn = document.getElementById("addToCartBtn");
+
+  let variantId = null;
+  if (variants.length) {
+    const variant = findVariant(variants, selectedSize, selectedColor);
+    if (!variant) {
+      cartMsg.style.display = "block";
+      cartMsg.className = "message error";
+      cartMsg.textContent = "Please select a valid size/color combination.";
+      return;
+    }
+    variantId = variant.id;
+  }
+
+  addBtn.disabled = true;
+  addBtn.textContent = "Adding...";
+
+  try {
+    await apiPost("/cart", {
+      product_id: product.id,
+      variant_id: variantId,
+      quantity,
+    }, token);
+
+    window.location.href = "/cart.html";
+  } catch (err) {
+    addBtn.disabled = false;
+    addBtn.textContent = "Add to Cart";
+    cartMsg.style.display = "block";
+    cartMsg.className = "message error";
+    cartMsg.textContent = err.message || "Could not add to cart.";
+  }
+}
+
+async function checkIfAdmin() {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const data = await apiGet("/auth/me", token);
+    return data.profile?.role === "admin";
+  } catch (err) {
+    return false;
+  }
 }
 
 async function loadProduct() {
@@ -196,6 +301,8 @@ async function loadProduct() {
     content.innerHTML = `<p class="empty-state">No product specified.</p>`;
     return;
   }
+
+  currentUserIsAdmin = await checkIfAdmin();
 
   try {
     const data = await apiGet(`/products/${encodeURIComponent(id)}`);

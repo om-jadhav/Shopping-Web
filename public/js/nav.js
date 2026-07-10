@@ -3,24 +3,45 @@
 // include this script after api.js, and it fills itself in based on
 // whether the visitor is logged out, a customer, or an admin.
 
+// public/js/nav.js
 async function renderNav() {
   const container = document.getElementById("navLinks");
   if (!container) return;
 
   const token = getToken();
+  const currentPath = window.location.pathname;
+
+  const allLinks = (isAdmin) => [
+    { href: "/products.html", label: "Shop" },
+    { href: isAdmin ? "/admin.html" : "/index.html", label: isAdmin ? "Admin" : "My Account" },
+    ...(isAdmin ? [] : [{ href: "/cart.html", label: "My Cart" }]),
+  ];
+
+  function renderLinks(links) {
+    return links
+      .filter((link) => link.href !== currentPath)
+      .map((link) => `<a href="${link.href}">${link.label}</a>`)
+      .join("");
+  }
 
   if (!token) {
-    container.innerHTML = `<a href="/login.html">Log in</a><a href="/signup.html">Sign up</a>`;
+    const guestLinks = [
+      { href: "/products.html", label: "Shop" },
+      { href: "/login.html", label: "Log in" },
+      { href: "/signup.html", label: "Sign up" },
+    ];
+    container.innerHTML = renderLinks(guestLinks);
     return;
   }
 
   try {
     const data = await apiGet("/auth/me", token);
     const isAdmin = data.profile?.role === "admin";
-    container.innerHTML = `
-      <a href="${isAdmin ? "/admin.html" : "/index.html"}">${isAdmin ? "Admin" : "My Account"}</a>
-      <a href="#" id="navLogout">Log out</a>
-    `;
+
+    container.innerHTML =
+      renderLinks(allLinks(isAdmin)) +
+      `<a href="#" id="navLogout">Log out</a>`;
+
     document.getElementById("navLogout").addEventListener("click", async (e) => {
       e.preventDefault();
       try {
@@ -31,7 +52,12 @@ async function renderNav() {
     });
   } catch (err) {
     clearToken();
-    container.innerHTML = `<a href="/login.html">Log in</a><a href="/signup.html">Sign up</a>`;
+    const guestLinks = [
+      { href: "/products.html", label: "Shop" },
+      { href: "/login.html", label: "Log in" },
+      { href: "/signup.html", label: "Sign up" },
+    ];
+    container.innerHTML = renderLinks(guestLinks);
   }
 }
 

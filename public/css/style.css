@@ -169,3 +169,29 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   color: var(--text);
   margin-top: 28px;
 }
+/* ===========================
+   Shop-style pages (product detail, cart, products list)
+=========================== */
+
+body.page-shop {
+  align-items: flex-start;
+  padding-top: 80px;
+}
+
+.nav-links {
+  position: absolute;
+  top: 28px;
+  right: 32px;
+  display: flex;
+  gap: 18px;
+  font-size: 0.85rem;
+}
+
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  color: var(--accent-soft);
+}
