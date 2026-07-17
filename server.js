@@ -11,7 +11,8 @@ const offerRoutes = require("./routes/offerRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const offerController = require("./controllers/offerController");
 const cartRoutes = require("./routes/cartRoutes");
-
+const orderRoutes = require("./routes/orderRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -28,7 +29,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/offers", offerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/cart", cartRoutes);
-
+app.use("/api/orders", orderRoutes);
+app.use("/api/reviews", reviewRoutes);
 // Simple health check - good way to confirm the server + env vars are alive
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });

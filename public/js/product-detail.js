@@ -194,6 +194,7 @@ function renderProduct(product) {
         ${sizeSwatchesHtml()}
         ${colorSwatchesHtml()}
         ${currentStockHtml()}
+        <div id="reviewsSection" class="reviews-section"></div>
         ${addToCartSectionHtml()}
       </div>
     `;
@@ -239,6 +240,7 @@ function renderProduct(product) {
   }
 
   render();
+  loadReviews(product.id); 
 }
 
 async function handleAddToCart(product, variants, getSelection) {
@@ -311,5 +313,101 @@ async function loadProduct() {
     content.innerHTML = `<p class="empty-state">Could not load product: ${err.message}</p>`;
   }
 }
+function starsHtml(rating) {
+  return "★".repeat(rating) + "☆".repeat(5 - rating);
+}
 
+async function loadReviews(productId) {
+  const reviewsSection = document.getElementById("reviewsSection");
+  if (!reviewsSection) return;
+
+  try {
+    const data = await apiGet(`/reviews/${productId}`);
+    const { reviews, summary } = data;
+
+    let formHtml = "";
+    const token = getToken();
+
+    if (token && !currentUserIsAdmin) {
+      try {
+        const statusData = await apiGet(`/reviews/${productId}/me`, token);
+        if (statusData.canReview) {
+          formHtml = `
+            <form id="reviewForm" class="review-form">
+              <label>Your rating</label>
+              <div class="star-input" id="starInput">
+                ${[1, 2, 3, 4, 5].map((n) => `<span class="star-choice" data-value="${n}">☆</span>`).join("")}
+              </div>
+              <input type="hidden" id="ratingValue" value="0" />
+              <label>Your comment (optional)</label>
+              <textarea id="reviewComment" rows="3" placeholder="Share your thoughts..."></textarea>
+              <button type="submit">Submit Review</button>
+              <div id="reviewMsg" class="message" style="display:none;"></div>
+            </form>
+          `;
+        } else if (statusData.hasReviewed) {
+          formHtml = `<p class="stock-note">You've already reviewed this product.</p>`;
+        }
+      } catch (_) {}
+    }
+
+    reviewsSection.innerHTML = `
+      <h3>Reviews ${summary.count > 0 ? `(${summary.average} ★ · ${summary.count} review${summary.count === 1 ? "" : "s"})` : ""}</h3>
+      ${formHtml}
+      <div class="review-list">
+        ${reviews.length === 0
+          ? `<p class="stock-note">No reviews yet.</p>`
+          : reviews.map((r) => `
+              <div class="review-item">
+                <div class="review-stars">${starsHtml(r.rating)}</div>
+                ${r.comment ? `<p class="review-comment">${r.comment}</p>` : ""}
+                <div class="review-date">${new Date(r.created_at).toLocaleDateString()}</div>
+              </div>
+            `).join("")}
+      </div>
+    `;
+
+    const starInput = document.getElementById("starInput");
+    if (starInput) {
+      let selectedRating = 0;
+      starInput.querySelectorAll(".star-choice").forEach((star) => {
+        star.addEventListener("click", () => {
+          selectedRating = Number(star.dataset.value);
+          document.getElementById("ratingValue").value = selectedRating;
+          starInput.querySelectorAll(".star-choice").forEach((s) => {
+            s.textContent = Number(s.dataset.value) <= selectedRating ? "★" : "☆";
+          });
+        });
+      });
+    }
+
+    const reviewForm = document.getElementById("reviewForm");
+    if (reviewForm) {
+      reviewForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const rating = Number(document.getElementById("ratingValue").value);
+        const comment = document.getElementById("reviewComment").value.trim();
+        const reviewMsg = document.getElementById("reviewMsg");
+
+        if (!rating) {
+          reviewMsg.style.display = "block";
+          reviewMsg.className = "message error";
+          reviewMsg.textContent = "Please select a star rating.";
+          return;
+        }
+
+        try {
+          await apiPost(`/reviews/${productId}`, { rating, comment }, getToken());
+          loadReviews(productId);
+        } catch (err) {
+          reviewMsg.style.display = "block";
+          reviewMsg.className = "message error";
+          reviewMsg.textContent = err.message;
+        }
+      });
+    }
+  } catch (err) {
+    reviewsSection.innerHTML = `<p class="stock-note">Could not load reviews.</p>`;
+  }
+}
 loadProduct();

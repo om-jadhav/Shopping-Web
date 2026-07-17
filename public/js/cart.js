@@ -67,6 +67,9 @@ function renderCart(items) {
       <span>Total</span>
       <span>₹${total}</span>
     </div>
+    <button id="checkoutBtn" ${unavailableItems.length > 0 ? "disabled" : ""}>
+      ${unavailableItems.length > 0 ? "Remove unavailable items to checkout" : "Proceed to Checkout"}
+    </button>
   `;
 
   document.querySelectorAll(".cart-qty-input").forEach((input) => {
@@ -76,6 +79,11 @@ function renderCart(items) {
   document.querySelectorAll(".cart-remove-btn").forEach((btn) => {
     btn.addEventListener("click", () => handleRemoveItem(btn.dataset.id));
   });
+
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", handleCheckout);
+  }
 }
 
 async function loadCart() {
@@ -128,6 +136,37 @@ async function handleRemoveItem(id) {
     loadCart();
   } catch (err) {
     console.error(err);
+  }
+}
+
+async function handleCheckout() {
+  const token = getToken();
+  const checkoutBtn = document.getElementById("checkoutBtn");
+
+  checkoutBtn.disabled = true;
+  checkoutBtn.textContent = "Placing order...";
+
+  try {
+    const res = await fetch("/api/orders/checkout", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const result = await res.json();
+
+    if (!res.ok) {
+      alert(result.error || "Checkout failed.");
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = "Proceed to Checkout";
+      return;
+    }
+
+    alert("Order placed successfully!");
+    window.location.href = "/products.html";
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong during checkout.");
+    checkoutBtn.disabled = false;
+    checkoutBtn.textContent = "Proceed to Checkout";
   }
 }
 
