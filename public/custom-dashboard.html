@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Custom Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <link rel="stylesheet" href="/css/custom-dashboard.css" />
+</head>
+
+<body class="page-admin">
+
+  <div class="tag">shopline</div>
+
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <h1>Custom Dashboard</h1>
+      <div class="links">
+        <a href="/admin.html">Manage Products</a>
+        <a href="/offers.html">Manage Offers</a>
+        <a href="/products.html">View shop</a>
+        <a href="#" id="logoutLink">Log out</a>
+      </div>
+    </div>
+
+    <!-- ===== ADD MATERIAL (compact) ===== -->
+    <div class="panel panel-compact">
+      <div class="panel-heading-row">
+        <h2 id="formHeading">Add material</h2>
+        <a href="#" id="cancelEditLink" class="cancel-edit-link">Cancel</a>
+      </div>
+      <form id="materialForm">
+        <label for="materialName">Name</label>
+        <input id="materialName" type="text" placeholder="Cotton" required />
+
+        <label for="materialStock">Stock qty</label>
+        <input id="materialStock" type="number" min="0" placeholder="50" required />
+
+        <button type="submit" id="submitBtn">Add material</button>
+        <div id="formMsg" class="message"></div>
+      </form>
+    </div>
+
+    <!-- ===== EXISTING MATERIALS ===== -->
+    <div class="panel">
+      <h2>Existing materials</h2>
+      <div id="materialList">Loading…</div>
+    </div>
+
+    <!-- ===== CUSTOM ORDERS ===== -->
+    <div class="panel">
+      <h2>Custom Orders</h2>
+      <div id="customOrderList">
+        <p class="stock-note">No custom orders yet — this section will populate once customers start placing custom t-shirt orders.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/custom-dashboard.js"></script>
+</body>
+
+</html>

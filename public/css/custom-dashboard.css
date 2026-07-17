@@ -1,0 +1,89 @@
+/* public/css/custom-dashboard.css - extends admin.css */
+
+.dashboard-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.panel-compact {
+  max-width: 420px;
+}
+
+.panel-main {
+  flex: 1;
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.panel-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cancel-edit-link {
+  display: none;
+  color: #d9534f;
+  font-size: 0.85rem;
+}
+
+.cancel-edit-link.visible {
+  display: inline;
+}
+
+@media (max-width: 700px) {
+  .dashboard-row {
+    flex-direction: column;
+  }
+
+  .panel-compact {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+.material-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--surface-border);
+  gap: 14px;
+}
+
+.material-list-item:last-child {
+  border-bottom: none;
+}
+
+.material-list-item .meta .name {
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.material-list-item .meta .sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.stock-inline-form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.stock-inline-form input {
+  width: 70px;
+  padding: 7px 8px;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.stock-inline-form button {
+  width: auto;
+  margin: 0;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+}
