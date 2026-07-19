@@ -87,3 +87,97 @@
   padding: 7px 10px;
   font-size: 0.78rem;
 }
+/* ===== Custom Orders (admin) ===== */
+.custom-order-card {
+  border-bottom: 1px solid var(--surface-border);
+  padding: 16px 0;
+}
+
+.custom-order-card:last-child { border-bottom: none; }
+
+.custom-order-top {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.custom-order-thumbs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.design-thumb-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+}
+
+.design-thumb-img {
+  width: 64px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--surface-border);
+  background: #14161f;
+}
+
+.design-thumb-label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.design-thumb-item .download-btn {
+  width: 100%;
+  margin: 0;
+  padding: 4px 0;
+  font-size: 0.68rem;
+}
+
+.custom-order-meta {
+  font-size: 0.85rem;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-order-meta .field-label {
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.custom-order-meta .order-date {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.custom-order-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-select {
+  background: #14161f;
+  color: var(--text);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.custom-order-actions button {
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}

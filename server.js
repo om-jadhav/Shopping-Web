@@ -14,6 +14,7 @@ const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const materialRoutes = require("./routes/materialRoutes");
+const customOrderRoutes = require("./routes/customOrderRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,6 +35,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/materials", materialRoutes);
+app.use("/api/custom-orders", customOrderRoutes);
 
 // Simple health check - good way to confirm the server + env vars are alive
 app.get("/api/health", (req, res) => {

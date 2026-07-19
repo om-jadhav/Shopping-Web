@@ -52,10 +52,27 @@ async function deleteMaterial(id) {
   if (error) throw error;
 }
 
+// Atomically reduces stock by qty. Throws if there isn't enough stock left -
+// callers should catch this and stop the order before inserting anything.
+async function decrementStock(materialId, qty) {
+  const { error } = await supabaseAdmin.rpc("decrement_material_stock", {
+    p_material_id: materialId,
+    p_qty: qty,
+  });
+
+  if (error) {
+    if (error.message && error.message.includes("INSUFFICIENT_MATERIAL_STOCK")) {
+      throw new Error("Not enough material in stock for this order.");
+    }
+    throw error;
+  }
+}
+
 module.exports = {
   getActiveMaterials,
   getAllMaterialsForAdmin,
   createMaterial,
   updateMaterial,
   deleteMaterial,
+  decrementStock,
 };

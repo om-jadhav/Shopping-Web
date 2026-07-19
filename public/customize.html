@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design Your Own T-Shirt</title>
+<link rel="stylesheet" href="/css/style.css" />
+<link rel="stylesheet" href="/css/products.css" />
+<link rel="stylesheet" href="/css/customize.css" />
+</head>
+<body class="page-shop">
+
+<div class="tag">shopline</div>
+<div id="navLinks" class="nav-links"></div>
+
+<div class="customize-wrap">
+  <a class="back-link" href="/products.html">&larr; Back to shop</a>
+  <h1>Design Your Own T-Shirt</h1>
+
+  <div id="profileWarningBanner" class="profile-warning-banner" style="display:none;">
+    Please complete your name, phone, and address under
+    <a href="/index.html">My Account</a> before placing a custom order.
+  </div>
+
+  <div class="customize-grid">
+
+    <div class="preview-col">
+      <div class="canvas-row">
+        <div class="canvas-box">
+          <canvas id="frontCanvas" width="240" height="300" class="clickable-canvas"></canvas>
+          <p class="stock-note">Front &middot; click to enlarge</p>
+        </div>
+        <div class="canvas-box">
+          <canvas id="backCanvas" width="240" height="300" class="clickable-canvas"></canvas>
+          <p class="stock-note">Back &middot; click to enlarge</p>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label>Front design</label>
+        <input type="file" id="frontUpload" accept="image/png, image/jpeg" />
+        <button type="button" id="frontRemoveBtn" class="remove-upload-btn" style="display:none;">Remove</button>
+        <p class="stock-note" id="frontUploadNote">No image uploaded.</p>
+      </div>
+
+      <div class="option-group">
+        <label>Front print position</label>
+        <div class="swatches" id="placementSwatches">
+          <div class="swatch selected" data-placement="center">Center</div>
+          <div class="swatch" data-placement="left">Left</div>
+          <div class="swatch" data-placement="right">Right</div>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label>Back design</label>
+        <input type="file" id="backUpload" accept="image/png, image/jpeg" />
+        <button type="button" id="backRemoveBtn" class="remove-upload-btn" style="display:none;">Remove</button>
+        <p class="stock-note" id="backUploadNote">No image uploaded.</p>
+      </div>
+
+      <div class="option-group">
+        <label>Back print position</label>
+        <div class="swatches" id="backPlacementSwatches">
+          <div class="swatch selected" data-placement="center">Center</div>
+          <div class="swatch" data-placement="left">Left</div>
+          <div class="swatch" data-placement="right">Right</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="options-col">
+      <div class="option-group">
+        <label>Color</label>
+        <div class="swatches" id="colorSwatches"></div>
+      </div>
+
+      <div class="option-group">
+        <label>Material</label>
+        <select id="materialSelect"><option value="">Loading…</option></select>
+      </div>
+
+      <div class="option-group">
+        <label>Quantity breakdown</label>
+        <div id="breakdownRows"></div>
+        <button type="button" id="addRowBtn" class="btn-secondary">+ Add another size/gender</button>
+        <p class="stock-note" id="totalQtyNote">Total: 0 shirts</p>
+      </div>
+
+      <div class="option-group">
+        <label>Anything else we should know?</label>
+        <textarea id="descriptionInput" rows="4" placeholder="e.g. print small logo on sleeve too, keep design centered lower, etc."></textarea>
+      </div>
+
+      <button id="proceedBtn" disabled>Continue</button>
+      <div id="customizeMsg" class="message" style="display:none;"></div>
+    </div>
+
+  </div>
+
+  <div id="previewModal" class="preview-modal">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <span id="modalLabel">Front</span>
+        <button type="button" id="modalCloseBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-canvas-wrap">
+        <canvas id="modalCanvas" width="480" height="600"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/customize.js"></script>
+</body>
+</html>
