@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Orders</title>
+<link rel="stylesheet" href="/css/style.css" />
+<link rel="stylesheet" href="/css/products.css" />
+<link rel="stylesheet" href="/css/orders.css" />
+</head>
+<body class="page-shop">
+
+<div class="tag">shopline</div>
+<div id="navLinks" class="nav-links"></div>
+
+<div class="orders-wrap">
+  <h1>My Orders</h1>
+
+  <section class="orders-section">
+    <h2>Current Orders</h2>
+    <div id="activeOrdersList">Loading…</div>
+  </section>
+
+  <section class="orders-section">
+    <h2>Completed Orders</h2>
+    <div id="completedOrdersList">Loading…</div>
+  </section>
+</div>
+
+<div id="lightboxModal" class="lightbox-modal">
+  <div class="lightbox-inner">
+    <button type="button" id="lightboxCloseBtn" class="modal-close-btn">&times;</button>
+    <img id="lightboxImg" src="" alt="Design preview enlarged" />
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/orders.js"></script>
+</body>
+</html>

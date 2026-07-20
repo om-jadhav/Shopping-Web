@@ -1,0 +1,228 @@
+/* public/css/customize.css - extends style.css and products.css */
+
+.customize-wrap {
+  max-width: 960px;
+  width: 100%;
+}
+
+.customize-wrap h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  margin: 0 0 20px;
+}
+
+.customize-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 760px) {
+  .customize-grid { grid-template-columns: 1fr; }
+}
+
+.canvas-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.canvas-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.canvas-box canvas {
+  width: 100%;
+  max-width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.clickable-canvas {
+  cursor: zoom-in;
+}
+
+/* Dynamic backdrop so dark shirts never visually merge into the canvas
+   background, and light shirts get a bit of contrast too */
+.canvas-box.backdrop-light canvas {
+  background: #e9e9ec;
+}
+
+.canvas-box.backdrop-dark canvas {
+  background: var(--surface);
+}
+
+.error-note {
+  color: var(--error);
+}
+
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--surface-border);
+  display: inline-block;
+}
+
+.color-swatch.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+#materialSelect,
+.breakdown-row select {
+  background: #14161f;
+  color: var(--text);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+#materialSelect { width: 100%; }
+
+#descriptionInput {
+  width: 100%;
+  background: #14161f;
+  color: var(--text);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+#frontUpload, #backUpload {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.breakdown-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.breakdown-row select { flex: 1; }
+
+.breakdown-row input[type="number"] {
+  width: 70px;
+  padding: 9px 8px;
+  background: #14161f;
+  color: var(--text);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.breakdown-row .remove-row-btn {
+  width: auto;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  background: transparent;
+  border: 1px solid var(--surface-border);
+  color: var(--muted);
+}
+
+/* ===== Bigger preview modal ===== */
+.preview-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.preview-modal.open {
+  display: flex;
+}
+
+.modal-inner {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  padding: 18px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  width: auto;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 1.1rem;
+  background: transparent;
+  border: 1px solid var(--surface-border);
+  color: var(--text);
+  line-height: 1;
+}
+
+.modal-canvas-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.modal-canvas-wrap.backdrop-light {
+  background: #e9e9ec;
+}
+
+.modal-canvas-wrap.backdrop-dark {
+  background: var(--surface);
+}
+
+#modalCanvas {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 8px;
+}
+
+.remove-upload-btn {
+  width: auto;
+  margin: 8px 0 0;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  background: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  color: var(--error);
+}
+
+.profile-warning-banner {
+  background: rgba(255, 122, 82, 0.1);
+  border: 1px solid rgba(255, 122, 82, 0.35);
+  color: var(--accent-soft);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  margin-bottom: 20px;
+}
+
+.profile-warning-banner a {
+  color: var(--accent-soft);
+  font-weight: 600;
+}

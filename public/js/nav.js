@@ -13,6 +13,8 @@ async function renderNav() {
 
   const allLinks = (isAdmin) => [
     { href: "/products.html", label: "Shop" },
+    ...(isAdmin ? [] : [{ href: "/customize.html", label: "Custom T-Shirt" }]),
+    ...(isAdmin ? [] : [{ href: "/orders.html", label: "Orders" }]),
     { href: isAdmin ? "/admin.html" : "/index.html", label: isAdmin ? "Admin" : "My Account" },
     ...(isAdmin ? [] : [{ href: "/cart.html", label: "My Cart" }]),
   ];
@@ -27,6 +29,7 @@ async function renderNav() {
   if (!token) {
     const guestLinks = [
       { href: "/products.html", label: "Shop" },
+      { href: "/customize.html", label: "Custom T-Shirt" },
       { href: "/login.html", label: "Log in" },
       { href: "/signup.html", label: "Sign up" },
     ];
@@ -54,6 +57,7 @@ async function renderNav() {
     clearToken();
     const guestLinks = [
       { href: "/products.html", label: "Shop" },
+      { href: "/customize.html", label: "Custom T-Shirt" },
       { href: "/login.html", label: "Log in" },
       { href: "/signup.html", label: "Sign up" },
     ];
