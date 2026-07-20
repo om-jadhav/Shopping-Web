@@ -1,27 +1,34 @@
-// public/js/signup.js
-const form = document.getElementById("signupForm");
+// public/js/login.js
+const form = document.getElementById("loginForm");
 const msg = document.getElementById("msg");
 const submitBtn = document.getElementById("submitBtn");
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+if (togglePassword) {
+  togglePassword.addEventListener("click", () => {
+    const isHidden = passwordInput.type === "password";
+    passwordInput.type = isHidden ? "text" : "password";
+    togglePassword.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+  });
+}
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   submitBtn.disabled = true;
 
-  const fullName = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   try {
-    const data = await apiPost("/auth/signup", { email, password, fullName });
+    const data = await apiPost("/auth/login", { email, password });
+    saveToken(data.session.access_token);
 
-    // Always send the person to the login page rather than auto-logging
-    // them in here — keeps the flow explicit: sign up, then log in.
-    const message = data.session
-      ? "Account created! Redirecting to login…"
-      : data.message; // e.g. "check your email to confirm" when confirmation is required
-
-    showMessage(msg, message, "success");
-    setTimeout(() => (window.location.href = "/login.html"), 1200);
+    const isAdmin = data.profile?.role === "admin";
+    showMessage(msg, "Logged in! Redirecting…", "success");
+    setTimeout(() => {
+      window.location.href = isAdmin ? "/admin.html" : "/products.html";
+    }, 600);
   } catch (err) {
     showMessage(msg, err.message, "error");
   } finally {

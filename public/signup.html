@@ -1,37 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sign up</title>
-<link rel="stylesheet" href="/css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign up — IDKClothing</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
 </head>
-<body>
 
-<div class="tag">shopline</div>
+<body class="auth-page">
 
-<div class="card">
-  <h1>Create your account</h1>
-  <p class="subtitle">Start shopping in a couple of minutes.</p>
+  <div class="auth-wrap">
 
-  <form id="signupForm">
-    <label for="fullName">Full name</label>
-    <input id="fullName" type="text" placeholder="Jane Doe" />
+    <div class="auth-visual">
+      <div class="tag">IDK<span class="brand-accent">Clothing</span></div>
 
-    <label for="email">Email</label>
-    <input id="email" type="email" placeholder="you@example.com" required />
+      <div class="auth-visual-content">
+        <h2>Join <span class="accent-text">Us!</span></h2>
+        <p class="auth-visual-subtitle">Create your account</p>
+        <p class="auth-visual-desc">
+          Start shopping Anime Accessories in a couple of minutes — offers, wishlist and Customized Shirts included.
+        </p>
+        <div class="auth-feature-badges">
+          <div class="feature-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 3l-4 2-4-2-5 3v4l3-1v11h12V9l3 1V6z" />
+            </svg>
+            <span>Customized Shirts</span>
+          </div>
+          <div class="feature-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 3H3v18h18V3z" />
+              <path d="M9 3v18M3 9h6M15 3v6M9 15h12" />
+            </svg>
+            <span>Design Your Own Fit</span>
+          </div>
+          <div class="feature-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span>Multiple Anime Shirts</span>
+          </div>
+        </div>
 
-    <label for="password">Password</label>
-    <input id="password" type="password" placeholder="At least 6 characters" required minlength="6" />
+        <div class="auth-graphic">
+          <div class="auth-dot"></div>
+          <div class="auth-dot"></div>
+          <div class="auth-dot"></div>
 
-    <button type="submit" id="submitBtn">Sign up</button>
-    <div id="msg" class="message"></div>
-  </form>
+          <div class="auth-icon-chip chip-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z" />
+              <circle cx="7.5" cy="7.5" r="1.5" />
+            </svg>
+          </div>
+          <div class="auth-icon-chip chip-cart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+          </div>
+          <div class="auth-icon-chip chip-heart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </div>
 
-  <p class="switch-link">Already have an account? <a href="/login.html">Log in</a></p>
-</div>
+          <div class="auth-icon-chip chip-sparkle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+          <div class="auth-graphic-shirt">
+            <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="shirtBody" x1="10%" y1="0%" x2="90%" y2="100%">
+                  <stop offset="0%" stop-color="#484e5e" />
+                  <stop offset="30%" stop-color="#333743" />
+                  <stop offset="60%" stop-color="#23262f" />
+                  <stop offset="100%" stop-color="#16171d" />
+                </linearGradient>
+                <linearGradient id="shirtHighlight" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14" />
+                  <stop offset="40%" stop-color="#ffffff" stop-opacity="0.02" />
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                </linearGradient>
+                <radialGradient id="neckShadow" cx="50%" cy="0%" r="60%">
+                  <stop offset="0%" stop-color="#000000" stop-opacity="0.55" />
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+                </radialGradient>
+                <clipPath id="printClip">
+                  <rect x="60" y="76" width="80" height="106" rx="4" />
+                </clipPath>
+                <clipPath id="bodyClip">
+                  <path d="
+          M70,18 L45,30 L15,55 L8,72 L28,90 L48,72 L48,195
+          Q48,206 60,206 L140,206 Q152,206 152,195 L152,72
+          L172,90 L192,72 L185,55 L155,30 L130,18
+          Q118,32 100,32 Q82,32 70,18 Z" />
+                </clipPath>
+              </defs>
 
-<script src="/js/api.js"></script>
-<script src="/js/signup.js"></script>
+              <!-- Base fabric -->
+              <path class="shirt-body" d="
+      M70,18 L45,30 L15,55 L8,72 L28,90 L48,72 L48,195
+      Q48,206 60,206 L140,206 Q152,206 152,195 L152,72
+      L172,90 L192,72 L185,55 L155,30 L130,18
+      Q118,32 100,32 Q82,32 70,18 Z" />
+
+              <!-- Ambient shadow under collar -->
+              <ellipse cx="100" cy="30" rx="42" ry="20" fill="url(#neckShadow)" clip-path="url(#bodyClip)" />
+
+              <!-- Diagonal fabric sheen -->
+              <path fill="url(#shirtHighlight)" clip-path="url(#bodyClip)" d="M20,20 L90,20 L40,210 L-10,210 Z" />
+
+              <!-- Ribbed collar -->
+              <path class="shirt-collar-rib" d="M76,22 Q100,40 124,22" />
+              <path class="shirt-collar-rib-shadow" d="M76,24 Q100,42 124,24" />
+
+              <!-- Print -->
+              <image href="/images/warrior-print.png" x="60" y="76" width="80" height="107"
+                preserveAspectRatio="xMidYMid meet" clip-path="url(#printClip)" />
+
+              <!-- Fold shading -->
+              <path class="shirt-fold-light" d="M65,95 Q60,150 68,200" />
+              <path class="shirt-fold-light" d="M135,95 Q140,150 132,200" />
+              <path class="shirt-fold-dark" d="M52,80 Q56,140 50,190" />
+              <path class="shirt-fold-dark" d="M148,80 Q144,140 150,190" />
+
+              <!-- Sleeve seam highlights -->
+              <path class="shirt-seam" d="M45,30 L15,55" />
+              <path class="shirt-seam" d="M155,30 L185,55" />
+
+              <!-- Bottom hem shadow -->
+              <path class="shirt-hem" d="M50,198 Q100,208 150,198" />
+            </svg>
+          </div>
+          <div class="auth-graphic-base"></div>
+        </div>
+        <a href="#authForm" class="get-started-btn">Get Started <span class="arrow">&rarr;</span></a>
+      </div>
+    </div>
+
+    <div class="auth-form-panel" id="authForm">
+      <div class="auth-form-top">
+        <a href="/products.html" class="back-to-site">
+          <span class="arrow-left">&larr;</span> Home
+        </a>
+      </div>
+
+      <div class="auth-card">
+        <h1>Sign Up</h1>
+        <p class="auth-card-subtitle">Start shopping in a couple of minutes</p>
+
+        <form id="signupForm">
+
+          <div class="input-group">
+            <label for="fullName">Full Name</label>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <input id="fullName" type="text" placeholder="Enter your full name" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="email">Email Address</label>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 6-10 7L2 6" />
+              </svg>
+              <input id="email" type="email" placeholder="Enter your email" required />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password</label>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input id="password" type="password" class="has-toggle" placeholder="At least 6 characters" required
+                minlength="6" />
+              <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="auth-submit">
+            Sign Up <span class="arrow">&rarr;</span>
+          </button>
+
+          <div id="msg" class="message"></div>
+        </form>
+
+        <p class="switch-link">Already have an account? <a href="/login.html">Log in</a></p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/signup.js"></script>
+  <div id="siteFooter"></div>
+  <script src="/js/footer.js"></script>
 </body>
+
 </html>
