@@ -20,11 +20,21 @@ async function renderNav() {
   ];
 
   function renderLinks(links) {
-    return links
-      .filter((link) => link.href !== currentPath)
-      .map((link) => `<a href="${link.href}">${link.label}</a>`)
-      .join("");
-  }
+  return links
+    .map((link) => {
+      const isActive = link.href === currentPath;
+
+      return `
+        <a 
+          href="${link.href}" 
+          class="${isActive ? "active" : ""}"
+        >
+          ${link.label}
+        </a>
+      `;
+    })
+    .join("");
+}
 
   if (!token) {
     const guestLinks = [

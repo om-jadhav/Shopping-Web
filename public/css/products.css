@@ -1,59 +1,136 @@
-/* public/css/products.css - extends style.css, doesn't replace it */
+/* =========================================================
+   PRODUCTS PAGE
+   Extends style.css
+========================================================= */
 
 .shop-wrap {
-  max-width: 1100px;
-  width: 100%;
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 110px 24px 40px;
 }
+
+/* =========================================================
+   SHOP HEADER
+========================================================= */
 
 .shop-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  gap: 20px;
+  margin-bottom: 30px;
   flex-wrap: wrap;
-  gap: 12px;
 }
 
 .shop-header h1 {
   font-family: 'Fraunces', serif;
   font-weight: 600;
   margin: 0;
+  letter-spacing: -0.02em;
 }
+
+/* =========================================================
+   FILTERS
+========================================================= */
 
 .filters {
   display: flex;
+  align-items: center;
   gap: 10px;
 }
 
 .filters select {
-  background: #14161f;
+  appearance: none;
+  min-width: 115px;
+  background: var(--surface);
   color: var(--text);
   border: 1px solid var(--surface-border);
-  border-radius: 8px;
-  padding: 9px 10px;
+  border-radius: 10px;
+  padding: 10px 34px 10px 12px;
   font-family: inherit;
   font-size: 0.85rem;
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+.filters select:hover {
+  border-color: var(--accent);
+  background: #1b1e29;
+  transform: translateY(-1px);
+}
+
+.filters select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.14);
+}
+
+/* =========================================================
+   PRODUCT GRID
+========================================================= */
 
 .product-grid {
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  justify-content: center;
+  gap: 24px;
 }
 
+/* =========================================================
+   PRODUCT CARD
+========================================================= */
+
 .product-card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.15s ease;
   text-decoration: none;
   color: var(--text);
   display: block;
+
+  opacity: 0;
+  animation: cardAppear 0.55s ease forwards;
+
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.product-card:hover { border-color: var(--accent); }
+/* Staggered card animation */
+.product-card:nth-child(1) { animation-delay: 0.05s; }
+.product-card:nth-child(2) { animation-delay: 0.1s; }
+.product-card:nth-child(3) { animation-delay: 0.15s; }
+.product-card:nth-child(4) { animation-delay: 0.2s; }
+.product-card:nth-child(5) { animation-delay: 0.25s; }
+.product-card:nth-child(6) { animation-delay: 0.3s; }
+.product-card:nth-child(7) { animation-delay: 0.35s; }
+.product-card:nth-child(8) { animation-delay: 0.4s; }
+
+.product-card:hover {
+  transform: translateY(-7px);
+  border-color: var(--accent);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 126, 95, 0.08);
+}
+
+.product-card:active {
+  transform: translateY(-3px);
+}
+
+/* =========================================================
+   PRODUCT IMAGE
+========================================================= */
 
 .product-card .img-box {
   width: 100%;
@@ -71,48 +148,71 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  transition:
+    transform 0.55s ease,
+    filter 0.35s ease;
 }
 
+.product-card:hover .img-box img {
+  transform: scale(1.07);
+  filter: brightness(1.05);
+}
+
+/* =========================================================
+   PRODUCT INFO
+========================================================= */
+
 .product-card .info {
-  padding: 12px 14px;
+  padding: 14px 15px 16px;
 }
 
 .product-card .cat-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 .product-card h3 {
-  font-size: 0.95rem;
-  margin: 4px 0 6px;
+  font-size: 0.98rem;
+  margin: 5px 0 7px;
   font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.product-card:hover h3 {
+  color: var(--accent-soft);
 }
 
 .product-card .price {
   color: var(--accent-soft);
   font-weight: 600;
+  font-size: 1rem;
 }
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
 
 .empty-state {
   color: var(--muted);
   text-align: center;
-  padding: 60px 0;
+  padding: 70px 0;
   grid-column: 1 / -1;
 }
 
-/* Product detail page */
+/* =========================================================
+   PRODUCT DETAIL PAGE
+========================================================= */
+
 .detail-wrap {
-  max-width: 760px;
-  width: 100%;
+  width: min(100%, 900px);
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
-}
-
-@media (max-width: 640px) {
-  .detail-wrap { grid-template-columns: 1fr; }
+  gap: 42px;
+  align-items: start;
 }
 
 .detail-img {
@@ -128,22 +228,38 @@
   overflow: hidden;
 }
 
-.detail-img img { width: 100%; height: 100%; object-fit: cover; }
+.detail-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.detail-img:hover img {
+  transform: scale(1.04);
+}
 
 .detail-info h1 {
   font-family: 'Fraunces', serif;
-  font-size: 1.5rem;
-  margin: 0 0 6px;
+  font-size: 1.7rem;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
 }
 
 .detail-price {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--accent-soft);
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.option-group { margin-bottom: 18px; }
+/* =========================================================
+   OPTIONS
+========================================================= */
+
+.option-group {
+  margin-bottom: 20px;
+}
 
 .option-group label {
   margin-top: 0;
@@ -164,6 +280,16 @@
   color: var(--text);
   font-size: 0.85rem;
   cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.swatch:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .swatch.selected {
@@ -185,25 +311,45 @@
   margin-top: 6px;
 }
 
+/* =========================================================
+   BACK LINK
+========================================================= */
+
 .back-link {
-  display: inline-block;
-  margin-bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 20px;
   color: var(--muted);
   text-decoration: none;
   font-size: 0.85rem;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
+
+.back-link:hover {
+  color: var(--text);
+  transform: translateX(-4px);
+}
+
+/* =========================================================
+   REVIEWS
+========================================================= */
+
 .reviews-section {
-  margin-top: 30px;
-  padding-top: 24px;
+  margin-top: 36px;
+  padding-top: 26px;
   border-top: 1px solid var(--surface-border);
 }
 
 .reviews-section h3 {
-  margin: 0 0 16px;
+  margin: 0 0 18px;
 }
 
 .review-form {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .star-input {
@@ -216,22 +362,40 @@
 
 .star-choice {
   color: var(--accent);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.star-choice:hover {
+  transform: scale(1.2);
+  filter: brightness(1.15);
 }
 
 .review-form textarea {
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 11px 12px;
+  border-radius: 9px;
   border: 1px solid var(--surface-border);
   background: #14161f;
   color: var(--text);
   font-family: inherit;
   resize: vertical;
   margin-bottom: 12px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.review-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.12);
 }
 
 .review-item {
-  padding: 14px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--surface-border);
 }
 
@@ -241,11 +405,105 @@
 }
 
 .review-comment {
-  margin: 6px 0;
+  margin: 7px 0;
   font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .review-date {
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   RESPONSIVENESS
+========================================================= */
+
+@media (max-width: 768px) {
+  .shop-wrap {
+    padding: 130px 18px 40px;
+  }
+
+  .shop-header {
+    align-items: flex-start;
+  }
+
+  .shop-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+@media (max-width: 560px) {
+  .shop-wrap {
+    padding: 130px 14px 40px;
+  }
+
+  .shop-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .shop-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .filters {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .filters select {
+    flex: 1;
+    width: 100%;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .product-card {
+    max-width: 360px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

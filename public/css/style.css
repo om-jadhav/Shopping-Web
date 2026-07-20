@@ -15,7 +15,9 @@
   --radius: 10px;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -23,19 +25,27 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 24px;
 }
+
+/* =========================================================
+   BRAND
+========================================================= */
 
 .tag {
   position: absolute;
   top: 28px;
   left: 32px;
+
   display: flex;
   align-items: center;
   gap: 8px;
+
   font-family: 'Fraunces', serif;
   font-weight: 600;
   font-size: 1.05rem;
@@ -44,18 +54,26 @@ body {
 
 .tag::before {
   content: "";
+
   width: 9px;
   height: 9px;
+
   border-radius: 50%;
   background: var(--accent);
 }
 
+/* =========================================================
+   AUTH CARD
+========================================================= */
+
 .card {
   width: 100%;
   max-width: 380px;
+
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius);
+
   padding: 36px 32px;
 }
 
@@ -63,6 +81,7 @@ body {
   font-family: 'Fraunces', serif;
   font-weight: 600;
   font-size: 1.6rem;
+
   margin: 0 0 6px;
 }
 
@@ -72,20 +91,29 @@ body {
   font-size: 0.92rem;
 }
 
+/* =========================================================
+   FORMS
+========================================================= */
+
 label {
   display: block;
+
   font-size: 0.82rem;
   color: var(--muted);
+
   margin-bottom: 6px;
   margin-top: 16px;
 }
 
 input {
   width: 100%;
+
   padding: 11px 12px;
+
   background: #14161f;
   border: 1px solid var(--surface-border);
   border-radius: 8px;
+
   color: var(--text);
   font-size: 0.95rem;
   font-family: inherit;
@@ -98,26 +126,47 @@ input:focus {
 
 button {
   width: 100%;
+
   margin-top: 24px;
   padding: 12px;
+
   background: var(--accent);
   color: #1a1108;
+
   border: none;
   border-radius: 8px;
+
   font-size: 0.95rem;
   font-weight: 600;
   font-family: inherit;
+
   cursor: pointer;
-  transition: opacity 0.15s ease;
+
+  transition:
+    opacity 0.15s ease,
+    transform 0.2s ease;
 }
 
-button:hover { opacity: 0.92; }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
+button:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   AUTH LINKS
+========================================================= */
 
 .switch-link {
   margin-top: 20px;
+
   font-size: 0.85rem;
   color: var(--muted);
+
   text-align: center;
 }
 
@@ -126,27 +175,42 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   text-decoration: none;
 }
 
+/* =========================================================
+   MESSAGES
+========================================================= */
+
 .message {
   margin-top: 16px;
   padding: 10px 12px;
+
   border-radius: 8px;
+
   font-size: 0.85rem;
+
   display: none;
 }
 
 .message.error {
   display: block;
+
   background: rgba(255, 107, 107, 0.12);
   color: var(--error);
+
   border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
 .message.success {
   display: block;
+
   background: rgba(107, 220, 156, 0.12);
   color: var(--success);
+
   border: 1px solid rgba(107, 220, 156, 0.3);
 }
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
 
 .dashboard {
   width: 100%;
@@ -156,42 +220,273 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .profile-row {
   display: flex;
   justify-content: space-between;
+
   padding: 12px 0;
+
   border-bottom: 1px solid var(--surface-border);
+
   font-size: 0.92rem;
 }
 
-.profile-row span:first-child { color: var(--muted); }
+.profile-row span:first-child {
+  color: var(--muted);
+}
 
 .logout-btn {
   background: transparent;
   border: 1px solid var(--surface-border);
   color: var(--text);
+
   margin-top: 28px;
 }
-/* ===========================
-   Shop-style pages (product detail, cart, products list)
-=========================== */
+
+/* =========================================================
+   SHOP PAGES
+========================================================= */
 
 body.page-shop {
-  align-items: flex-start;
-  padding-top: 80px;
+  display: block;
+
+  min-height: 100vh;
+
+  padding: 0;
 }
 
-.nav-links {
-  position: absolute;
-  top: 28px;
-  right: 32px;
-  display: flex;
-  gap: 18px;
-  font-size: 0.85rem;
+/* =========================================================
+   SHOP BRAND
+========================================================= */
+
+body.page-shop .tag {
+  position: fixed;
+
+  top: 24px;
+  left: 32px;
+
+  z-index: 1000;
 }
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+body.page-shop .nav-links {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 76px;
+
+  transform: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 30px;
+
+  z-index: 999;
+
+  background: rgba(17, 19, 26, 0.94);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+}
+
+/* NAV LINKS */
 
 .nav-links a {
+  position: relative;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
   color: var(--muted);
   text-decoration: none;
+
+  white-space: nowrap;
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
 }
 
 .nav-links a:hover {
-  color: var(--accent-soft);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+/* ACTIVE LINK */
+
+.nav-links a.active {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* UNDERLINE */
+
+.nav-links a::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: -9px;
+
+  height: 2px;
+
+  background: var(--accent);
+  border-radius: 999px;
+
+  transform: scaleX(0);
+  transform-origin: center;
+
+  transition: transform 0.25s ease;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  transform: scaleX(1);
+}
+
+/* =========================================================
+   NAV ICONS
+========================================================= */
+
+/* Cart icon */
+
+.nav-links a[href="/cart.html"]::before {
+  content: "🛒";
+
+  font-size: 0.9rem;
+  filter: grayscale(1);
+
+  transition:
+    filter 0.25s ease,
+    transform 0.25s ease;
+}
+
+.nav-links a[href="/cart.html"]:hover::before {
+  filter: grayscale(0);
+  transform: translateY(-2px);
+}
+
+/* Account avatar */
+
+.nav-links a[href="/index.html"]::before {
+  content: "◉";
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 21px;
+  height: 21px;
+
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+
+  font-size: 0.65rem;
+
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.nav-links a[href="/index.html"]:hover::before {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.nav-links a#navLogout {
+  color: #c8a7a0;
+}
+
+.nav-links a#navLogout:hover {
+  color: var(--error);
+}
+
+.nav-links a#navLogout::after {
+  background: var(--error);
+}
+
+/* =========================================================
+   SHOP CONTENT
+========================================================= */
+
+body.page-shop > main {
+  width: 100%;
+  padding: 42px 0 60px;
+}
+
+/* =========================================================
+   NAVBAR RESPONSIVENESS
+========================================================= */
+
+@media (max-width: 900px) {
+  body.page-shop .nav-links {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 700px) {
+  body.page-shop .nav-links {
+    height: auto;
+    min-height: 76px;
+
+    padding: 58px 20px 16px;
+
+    flex-wrap: wrap;
+    gap: 12px 18px;
+
+    justify-content: center;
+  }
+
+  body.page-shop > main {
+    padding-top: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  body.page-shop .nav-links {
+    gap: 10px 14px;
+  }
+
+  .nav-links a {
+    font-size: 0.78rem;
+  }
+}
+@media (max-width: 560px) {
+  .site-nav {
+    min-height: 96px;
+    padding: 16px 18px 14px;
+    gap: 12px;
+  }
+
+  .site-nav .tag {
+    justify-content: flex-start;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    gap: 10px 14px;
+  }
+
+  .nav-links a {
+    font-size: 0.76rem;
+  }
 }
