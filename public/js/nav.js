@@ -1,78 +1,88 @@
-// public/js/nav.js
-// Drop a <div id="navLinks" class="nav-links"></div> on any page,
-// include this script after api.js, and it fills itself in based on
-// whether the visitor is logged out, a customer, or an admin.
-
-// public/js/nav.js
 async function renderNav() {
-  const container = document.getElementById("navLinks");
-  if (!container) return;
 
-  const token = getToken();
-  const currentPath = window.location.pathname;
+    const nav = document.getElementById("navLinks");
+    if (!nav) return;
 
-  const allLinks = (isAdmin) => [
-    { href: "/products.html", label: "Shop" },
-    ...(isAdmin ? [] : [{ href: "/customize.html", label: "Custom T-Shirt" }]),
-    ...(isAdmin ? [] : [{ href: "/orders.html", label: "Orders" }]),
-    { href: isAdmin ? "/admin.html" : "/index.html", label: isAdmin ? "Admin" : "My Account" },
-    ...(isAdmin ? [] : [{ href: "/cart.html", label: "My Cart" }]),
-  ];
+    const current = window.location.pathname;
+    const token = getToken();
+    
+    function makeLinks(list) {
+        return list.map(link => `
+            <a href="${link.href}"
+               class="${current === link.href ? "active" : ""}">
+               ${link.label}
+            </a>
+        `).join("");
+    }
 
-  function renderLinks(links) {
-  return links
-    .map((link) => {
-      const isActive = link.href === currentPath;
+    let links = [];
 
-      return `
-        <a 
-          href="${link.href}" 
-          class="${isActive ? "active" : ""}"
-        >
-          ${link.label}
-        </a>
-      `;
-    })
-    .join("");
+    if (!token) {
+
+        links = [
+            {href:"/products.html",label:"Shop"},
+            {href:"/customize.html",label:"Custom T-Shirt"},
+            {href:"/login.html",label:"Login"},
+            {href:"/signup.html",label:"Signup"}
+        ];
+
+        nav.innerHTML = makeLinks(links);
+
+    } else {
+
+        try{
+
+            const me = await apiGet("/auth/me",token);
+
+            const admin = me.profile?.role==="admin";
+
+            links = [
+                {href:"/products.html",label:"Shop"},
+                ...(admin?[]:[{href:"/customize.html",label:"Custom T-Shirt"}]),
+                ...(admin?[]:[{href:"/orders.html",label:"Orders"}]),
+                {
+                    href:admin?"/admin.html":"/index.html",
+                    label:admin?"Admin":"My Account"
+                },
+                ...(admin?[]:[{href:"/cart.html",label:"Cart"}])
+            ];
+
+            nav.innerHTML =
+                makeLinks(links) +
+                `<a href="#" id="logoutBtn">Logout</a>`;
+
+            document
+            .getElementById("logoutBtn")
+            .onclick = async e=>{
+
+                e.preventDefault();
+
+                try{
+                    await apiPost("/auth/logout",{},token);
+                }catch(e){}
+
+                clearToken();
+
+                location.reload();
+
+            };
+
+        }catch{
+
+            clearToken();
+
+            location.reload();
+
+        }
+
+    }
+const toggle = document.getElementById("menuToggle");
+
+if (toggle) {
+    toggle.onclick = () => {
+        nav.classList.toggle("open");
+    };
 }
-
-  if (!token) {
-    const guestLinks = [
-      { href: "/products.html", label: "Shop" },
-      { href: "/customize.html", label: "Custom T-Shirt" },
-      { href: "/login.html", label: "Log in" },
-      { href: "/signup.html", label: "Sign up" },
-    ];
-    container.innerHTML = renderLinks(guestLinks);
-    return;
-  }
-
-  try {
-    const data = await apiGet("/auth/me", token);
-    const isAdmin = data.profile?.role === "admin";
-
-    container.innerHTML =
-      renderLinks(allLinks(isAdmin)) +
-      `<a href="#" id="navLogout">Log out</a>`;
-
-    document.getElementById("navLogout").addEventListener("click", async (e) => {
-      e.preventDefault();
-      try {
-        await apiPost("/auth/logout", {}, token);
-      } catch (_) {}
-      clearToken();
-      window.location.reload();
-    });
-  } catch (err) {
-    clearToken();
-    const guestLinks = [
-      { href: "/products.html", label: "Shop" },
-      { href: "/customize.html", label: "Custom T-Shirt" },
-      { href: "/login.html", label: "Log in" },
-      { href: "/signup.html", label: "Sign up" },
-    ];
-    container.innerHTML = renderLinks(guestLinks);
-  }
 }
 
 renderNav();
