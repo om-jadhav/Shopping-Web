@@ -209,9 +209,9 @@
 .detail-wrap {
   width: min(100%, 900px);
   margin: 0 auto;
-  display: grid;
+  display: flex;
   grid-template-columns: 1fr 1fr;
-  gap: 42px;
+  /* gap: 20px; */
   align-items: start;
 }
 

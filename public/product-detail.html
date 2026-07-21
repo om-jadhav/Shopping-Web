@@ -4,38 +4,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product</title>
+  <title>Product Details | IDK Clothing</title>
+
+  <!-- Existing Stylesheets -->
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/products.css" />
-  <link rel="stylesheet" href="/css/product-detail.css">
+  <link rel="stylesheet" href="/css/product-detail.css" />
   <link rel="stylesheet" href="/css/footer.css" />
+
+  <!-- FontAwesome Icons for UI Elements -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 
 <body class="page-shop">
 
+  <!-- Site Header -->
   <header class="site-header">
-
-    <div class="tag">
-        IDK Clothing
-    </div>
-
-    <button id="menuToggle" class="menu-toggle">
-        ☰
-    </button>
-
+    <div class="tag">IDK Clothing</div>
+    <button id="menuToggle" class="menu-toggle" aria-label="Toggle Navigation">☰</button>
     <nav id="navLinks" class="nav-links"></nav>
+  </header>
 
-</header>
-
+  <!-- Main Container -->
   <div class="detail-wrap">
-    <div id="content">Loading…</div>
+    <div id="content">
+      <div class="loading-state">Loading product details...</div>
+    </div>
   </div>
 
+  <!-- Footers & Scripts -->
   <script src="/js/api.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/product-detail.js"></script>
+
   <div id="siteFooter"></div>
   <script src="/js/footer.js"></script>
+
 </body>
 
 </html>
