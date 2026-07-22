@@ -27,6 +27,7 @@ function addVariantRow(prefill = {}) {
   const row = document.createElement("div");
   row.className = "variant-row";
   row.id = rowId;
+  row.dataset.variantId = prefill.id || "";     // ← track DB id
   row.innerHTML = `
     <input type="text" class="v-size" placeholder="S, M, One Size..." value="${prefill.size || ""}" />
     <input type="text" class="v-color" placeholder="Black, Navy..." value="${prefill.color || ""}" />
@@ -37,17 +38,20 @@ function addVariantRow(prefill = {}) {
   variantRows.appendChild(row);
 }
 
-addVariantBtn.addEventListener("click", () => addVariantRow());
-
 function collectVariants() {
-  return [...variantRows.querySelectorAll(".variant-row")]
+  const rows = [...variantRows.querySelectorAll(".variant-row")];
+
+  return rows
     .map((row) => ({
+      id: row.dataset.variantId || null,
       size: row.querySelector(".v-size").value.trim(),
       color: row.querySelector(".v-color").value.trim(),
       stockQuantity: Number(row.querySelector(".v-stock").value) || 0,
     }))
     .filter((v) => v.size || v.color);
 }
+
+addVariantBtn.addEventListener("click", () => addVariantRow());
 
 async function loadCategoriesIntoSelect() {
   try {
