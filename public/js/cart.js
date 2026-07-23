@@ -31,15 +31,15 @@ function renderCart(items) {
   cartContent.innerHTML = `
     <div class="cart-items">
       ${items.map((item) => {
-        const product = item.products;
-        const variant = item.product_variants;
-        const image = product?.image_urls?.[0];
-        const price = itemPrice(item);
-        const pct = itemPercentage(item);
-        const maxQty = variant ? variant.stock_quantity : 99;
-        const unavailable = product?.is_active === false;
+    const product = item.products;
+    const variant = item.product_variants;
+    const image = product?.image_urls?.[0];
+    const price = itemPrice(item);
+    const pct = itemPercentage(item);
+    const maxQty = variant ? variant.stock_quantity : 99;
+    const unavailable = product?.is_active === false;
 
-        return `
+    return `
           <div class="cart-item ${unavailable ? "cart-item-unavailable" : ""}" data-id="${item.id}">
             <div class="cart-item-img">
               ${image ? `<img src="${image}" alt="${product?.name || ""}" />` : '<div class="no-image-placeholder">No image</div>'}
@@ -48,29 +48,29 @@ function renderCart(items) {
               <div class="cart-item-name">${product?.name || "Unknown product"}</div>
               ${variant ? `<div class="cart-item-variant">${[variant.size, variant.color].filter(Boolean).join(" / ")}</div>` : ""}
               ${unavailable
-                ? `<div class="cart-item-unavailable-badge">No longer available</div>`
-                : pct > 0
-                  ? `
+        ? `<div class="cart-item-unavailable-badge">No longer available</div>`
+        : pct > 0
+          ? `
                     <div class="cart-item-price">
                       <span class="cart-item-price-discounted">₹${price}</span>
                       <span class="cart-item-price-original">₹${product?.price}</span>
                     </div>
                     <div class="cart-item-offer-name">${product?.offer_name || `${pct}% OFF`}</div>
                   `
-                  : `<div class="cart-item-price">₹${price}</div>`
-              }
+          : `<div class="cart-item-price">₹${price}</div>`
+      }
             </div>
             <div class="cart-item-controls">
               ${unavailable
-                ? ""
-                : `<input type="number" class="cart-qty-input" min="1" max="${maxQty}" value="${item.quantity}" data-id="${item.id}" />`
-              }
+        ? ""
+        : `<input type="number" class="cart-qty-input" min="1" max="${maxQty}" value="${item.quantity}" data-id="${item.id}" />`
+      }
               <button class="cart-remove-btn" data-id="${item.id}">Remove</button>
             </div>
             <div class="cart-item-subtotal">${unavailable ? "" : "₹" + price * item.quantity}</div>
           </div>
         `;
-      }).join("")}
+  }).join("")}
     </div>
     ${unavailableItems.length > 0
       ? `<p class="cart-notice">${unavailableItems.length} item(s) in your cart are no longer available and are excluded from your total.</p>`
@@ -99,18 +99,47 @@ function renderCart(items) {
   }
 }
 
+async function afterRenderCartChecks() {
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  if (!checkoutBtn) return;
+
+  // Don't override the "remove unavailable items" state with the profile message
+  if (checkoutBtn.disabled) return;
+
+  const isComplete = await checkProfileCompleteForCheckout();
+  if (!isComplete) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = "Complete your profile to checkout";
+    checkoutBtn.insertAdjacentHTML(
+      "afterend",
+      `<p class="cart-notice">Please complete your <a href="/index.html" style="color:var(--accent-soft)">profile</a> (name, phone, address) before checking out.</p>`
+    );
+  }
+}
+
 async function loadCart() {
   const token = getToken();
-  if (!token) {
-    window.location.href = "/login.html";
-    return;
-  }
+  if (!token) { window.location.href = "/login.html"; return; }
 
   try {
     const data = await apiGet("/cart", token);
     renderCart(data.items || []);
+    await afterRenderCartChecks();
   } catch (err) {
     cartContent.innerHTML = `<p class="empty-state">Could not load cart: ${err.message}</p>`;
+  }
+}
+
+const REQUIRED_PROFILE_FIELDS = ["full_name", "phone", "address_line1", "city", "state", "postal_code", "country"];
+
+async function checkProfileCompleteForCheckout() {
+  const token = getToken();
+  try {
+    const data = await apiGet("/auth/me", token);
+    const profile = data.profile || {};
+    return REQUIRED_PROFILE_FIELDS.every((f) => String(profile[f] || "").trim());
+  } catch {
+    return false;
   }
 }
 
