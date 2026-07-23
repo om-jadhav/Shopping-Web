@@ -1,13 +1,7 @@
 .cart-wrap {
   max-width: 700px;
-  margin: 20px auto 50px;
+  margin: 100px auto 50px;
   padding: 0 20px;
-}
-
-.cart-wrap h1 {
-  font-family: 'Fraunces', serif;
-  font-weight: 600;
-  margin-bottom: 24px;
 }
 
 .cart-items {
@@ -55,6 +49,25 @@
 .cart-item-price {
   font-size: 13px;
   color: var(--muted);
+  margin-top: 2px;
+}
+
+.cart-item-price-discounted {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.cart-item-price-original {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.cart-item-offer-name {
+  font-size: 12px;
+  color: var(--accent);
   margin-top: 2px;
 }
 

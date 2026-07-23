@@ -1,9 +1,13 @@
 // public/js/cart.js
 const cartContent = document.getElementById("cartContent");
 
+function itemPercentage(item) {
+  return parseInt(item.products?.offer_percentage ?? 0, 10) || 0;
+}
+
 function itemPrice(item) {
   const product = item.products;
-  const pct = parseInt(product?.offer_percentage ?? 0, 10) || 0;
+  const pct = itemPercentage(item);
   const base = product?.price || 0;
   return pct > 0 ? Math.round(base * (1 - pct / 100)) : base;
 }
@@ -31,6 +35,7 @@ function renderCart(items) {
         const variant = item.product_variants;
         const image = product?.image_urls?.[0];
         const price = itemPrice(item);
+        const pct = itemPercentage(item);
         const maxQty = variant ? variant.stock_quantity : 99;
         const unavailable = product?.is_active === false;
 
@@ -44,7 +49,15 @@ function renderCart(items) {
               ${variant ? `<div class="cart-item-variant">${[variant.size, variant.color].filter(Boolean).join(" / ")}</div>` : ""}
               ${unavailable
                 ? `<div class="cart-item-unavailable-badge">No longer available</div>`
-                : `<div class="cart-item-price">₹${price}</div>`
+                : pct > 0
+                  ? `
+                    <div class="cart-item-price">
+                      <span class="cart-item-price-discounted">₹${price}</span>
+                      <span class="cart-item-price-original">₹${product?.price}</span>
+                    </div>
+                    <div class="cart-item-offer-name">${product?.offer_name || `${pct}% OFF`}</div>
+                  `
+                  : `<div class="cart-item-price">₹${price}</div>`
               }
             </div>
             <div class="cart-item-controls">

@@ -71,7 +71,29 @@ async function listProductsAdmin(req, res) {
 async function getProduct(req, res) {
   try {
     const product = await productModel.getProductById(req.params.id);
-    res.json({ product });
+
+    let offer = null;
+    if (product.offer_id) {
+      const { data } = await supabaseAdmin
+        .from("offers")
+        .select("*")
+        .eq("id", product.offer_id)
+        .maybeSingle();
+      offer = data || null;
+    }
+
+    const offerPct = Number(offer?.percentage || 0);
+
+    res.json({
+      product: {
+        ...product,
+        offer,
+        offers: offer,
+        offer_percentage: offerPct,
+        end_date: offer?.end_date || null,
+        offer_end_date: offer?.end_date || null,
+      },
+    });
   } catch (err) {
     res.status(404).json({ error: "Product not found." });
   }
