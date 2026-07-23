@@ -18,9 +18,7 @@ const CANVAS_H = 300;
 const MODAL_CANVAS_W = 480;
 const MODAL_CANVAS_H = 600;
 
-// Print zones as fractions of the DRAWN GARMENT BOX. Same set used for
-// both front and back canvases - each side has its own independent
-// placement selector, but the zone shapes themselves are shared.
+// Print zones as fractions of the DRAWN GARMENT BOX.
 const PLACEMENT_ZONES = {
   center: { x: 0.29, y: 0.25, w: 0.45, h: 0.40 },
   left:   { x: 0.25, y: 0.25, w: 0.45, h: 0.40 },
@@ -39,6 +37,7 @@ const state = {
   breakdown: [{ gender: "male", size: "S", quantity: 1 }],
   description: "",
   profileComplete: false,
+  termsAccepted: false,
 };
 
 let frontBaseImg = null;
@@ -53,8 +52,6 @@ function loadImage(src) {
   });
 }
 
-// Fits `img` inside a box, preserving aspect ratio (like object-fit: contain),
-// centered within the box - so uploads never get stretched/distorted.
 function containRect(img, box) {
   const scale = Math.min(box.w / img.width, box.h / img.height);
   const w = img.width * scale;
@@ -73,10 +70,6 @@ function zoneToPixels(zone, garmentBox) {
   };
 }
 
-// Draws baseImg tinted with colorHex, then designImg (aspect-preserved,
-// clipped to baseImg's silhouette) at the given zone. canvasW/canvasH let
-// the same function drive both the small side-by-side canvases and the
-// bigger modal preview.
 function renderShirt(ctx, baseImg, designImg, zone, colorHex, canvasW, canvasH) {
   ctx.clearRect(0, 0, canvasW, canvasH);
   if (!baseImg) return;
@@ -127,8 +120,6 @@ function draw() {
   updateBackdrop();
 }
 
-// ---- Dynamic backdrop: dark shirts get a light backdrop and vice versa,
-// so the shirt never visually merges into the page/canvas background ----
 function relativeLuminance(hex) {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -149,18 +140,21 @@ function updateProceedState() {
   const hasDesign = state.frontDesignImage || state.backDesignImage;
   const hasMaterial = !!state.materialId;
   const hasQty = state.breakdown.some((row) => row.quantity > 0);
-  proceedBtn.disabled = !(hasDesign && hasMaterial && hasQty && state.profileComplete);
+  
+  proceedBtn.disabled = !(
+    hasDesign && 
+    hasMaterial && 
+    hasQty && 
+    state.profileComplete && 
+    state.termsAccepted
+  );
 }
 
 const REQUIRED_PROFILE_FIELDS = ["full_name", "phone", "address_line1", "city", "state", "postal_code", "country"];
 
-// Checks the customer's profile up front - before they invest time
-// designing - rather than only finding out after they hit Continue.
 async function checkProfileComplete() {
   const token = getToken();
   if (!token) {
-    // Not logged in yet - don't block design browsing, submit will redirect
-    // to login, and they can come back once their profile is set up.
     state.profileComplete = true;
     return;
   }
@@ -172,16 +166,14 @@ async function checkProfileComplete() {
     state.profileComplete = isComplete;
 
     const banner = document.getElementById("profileWarningBanner");
-    banner.style.display = isComplete ? "none" : "block";
+    if (banner) banner.style.display = isComplete ? "none" : "block";
   } catch (err) {
-    // If we can't verify, don't silently allow submission past the backend
-    // check anyway - but don't hard-block browsing either.
     state.profileComplete = true;
   }
   updateProceedState();
 }
 
-// ---- Uploads (restricted to PNG/JPEG only, matching the backend) ----
+// ---- Uploads ----
 const ALLOWED_TYPES = ["image/png", "image/jpeg"];
 
 function wireUpload(inputId, noteId, imgKey, fileKey, removeBtnId) {
@@ -230,6 +222,42 @@ function wireUpload(inputId, noteId, imgKey, fileKey, removeBtnId) {
   });
 }
 
+// ---- Terms & Conditions Modal & Checkbox ----
+function wireTermsAndConditions() {
+  const termsCheckbox = document.getElementById("termsCheckbox");
+  const openTermsLink = document.getElementById("openTermsLink");
+  const termsModal = document.getElementById("termsModal");
+  const termsModalCloseBtn = document.getElementById("termsModalCloseBtn");
+
+  if (termsCheckbox) {
+    termsCheckbox.addEventListener("change", (e) => {
+      state.termsAccepted = e.target.checked;
+      updateProceedState();
+    });
+  }
+
+  if (openTermsLink && termsModal) {
+    openTermsLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      termsModal.classList.add("open");
+    });
+  }
+
+  if (termsModalCloseBtn && termsModal) {
+    termsModalCloseBtn.addEventListener("click", () => {
+      termsModal.classList.remove("open");
+    });
+  }
+
+  if (termsModal) {
+    termsModal.addEventListener("click", (e) => {
+      if (e.target.id === "termsModal") {
+        termsModal.classList.remove("open");
+      }
+    });
+  }
+}
+
 // ---- Color swatches ----
 function renderColorSwatches() {
   const container = document.getElementById("colorSwatches");
@@ -248,7 +276,7 @@ function renderColorSwatches() {
   });
 }
 
-// ---- Placement swatches (front and back, independent) ----
+// ---- Placement swatches ----
 function wirePlacementSwatches(containerId, stateKey) {
   document.querySelectorAll(`#${containerId} .swatch`).forEach((el) => {
     el.addEventListener("click", () => {
@@ -466,6 +494,7 @@ async function init() {
   wirePlacementSwatches("placementSwatches", "placement");
   wirePlacementSwatches("backPlacementSwatches", "backPlacement");
   wirePreviewModal();
+  wireTermsAndConditions();
   renderColorSwatches();
   renderBreakdownRows();
   loadMaterials();

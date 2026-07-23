@@ -101,7 +101,15 @@
 
       <div class="option-group">
         <label>Anything else we should know?</label>
-        <textarea id="descriptionInput" rows="4" placeholder="e.g. print small logo on sleeve too, keep design centered lower, etc."></textarea>
+        <textarea id="descriptionInput" rows="4" placeholder="e.g. print small logo on sleeve too, keep design centered lower, mention if image background needs to be removed, etc."></textarea>
+      </div>
+
+      <!-- Terms & Conditions Checklist Box -->
+      <div class="option-group terms-group">
+        <label class="checkbox-label" for="termsCheckbox">
+          <input type="checkbox" id="termsCheckbox" />
+          <span>I have reviewed my design, image quality, fabric selection, and agree to the <a href="#" id="openTermsLink">Custom Order Terms & Conditions</a>.</span>
+        </label>
       </div>
 
       <button id="proceedBtn" disabled>Continue</button>
@@ -110,6 +118,7 @@
 
   </div>
 
+  <!-- Preview Modal -->
   <div id="previewModal" class="preview-modal">
     <div class="modal-inner">
       <div class="modal-header">
@@ -121,12 +130,39 @@
       </div>
     </div>
   </div>
+
+  <!-- Terms & Conditions Modal -->
+  <div id="termsModal" class="preview-modal">
+    <div class="modal-inner terms-modal-inner">
+      <div class="modal-header">
+        <span>Custom T-Shirt Terms & Conditions</span>
+        <button type="button" id="termsModalCloseBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body terms-content">
+        <h3>1. Image Quality & Artwork Requirements</h3>
+        <p>Customers are responsible for providing clear, high-resolution images or designs (PNG or high-quality JPEG recommended). IDK Clothing is not responsible for blurry or pixelated prints resulting from low-quality uploads.</p>
+
+        <h3>2. Background Removal & Instructions</h3>
+        <p>If your design requires a transparent background, please upload a PNG with the background already removed or explicitly mention in the note section whether background clearing is required. IDK Clothing is not liable for minor variations resulting from automatic background trimming.</p>
+
+        <h3>3. Fabric & Print Position</h3>
+        <p>Please review your selected cloth/material type, color, size breakdown, and artwork positioning (Center, Left, Right) carefully before submitting. What you select and describe is what will be printed.</p>
+
+        <h3>4. Final Sale — No Changes After Submission</h3>
+        <p>Once your order is submitted, it immediately enters processing. <strong>No changes, modifications, or cancellations</strong> can be made after submission. Custom orders are non-refundable unless there is a material defect in the garment.</p>
+
+        <h3>5. Queries & Support</h3>
+        <p>If you have any doubts about your image resolution, positioning, or custom requests prior to ordering, please reach out to us directly on Instagram: <strong>@idkclothing</strong>.</p>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="/js/api.js"></script>
 <script src="/js/nav.js"></script>
 <script src="/js/customize.js"></script>
 <div id="siteFooter"></div>
-  <script src="/js/footer.js"></script>
+<script src="/js/footer.js"></script>
 </body>
 </html>

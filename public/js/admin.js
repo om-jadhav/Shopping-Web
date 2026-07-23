@@ -17,6 +17,8 @@ let cachedProductsList = []; // Keeps track of products local data to prefill fa
 
 // Tracks surviving image links during an active product edit session
 let activeFormImagesArray = [];
+// Track newly selected local files array
+let selectedNewFilesArray = [];
 // -------------------------------
 
 let variantCounter = 0;
@@ -99,6 +101,7 @@ function renderExistingImagesManager() {
 function resetFormState() {
   editingProductId = null;
   activeFormImagesArray = []; // Reset tracked images collection vector
+  selectedNewFilesArray = []; // Clear newly selected image queue
   productForm.reset();
   formHeading.textContent = "Add a new product";
   submitBtn.textContent = "Create product";
@@ -134,7 +137,7 @@ function enterEditMode(productId) {
   editingProductId = productId;
   formHeading.textContent = `Editing: ${product.name}`;
   submitBtn.textContent = "Save Changes";
-  cancelEditLink.style.display = "inline";
+  cancelEditLink.style.display = "inline-block";
 
   // Images are optional during editing updates
   document.getElementById("productImages").required = false;
@@ -348,21 +351,15 @@ logoutLink.addEventListener("click", async (e) => {
 });
 
 // Live local preview generation for brand-new file selections
-// Track newly selected files in a state array
-let selectedNewFilesArray = [];
-
 document.getElementById("productImages").addEventListener("change", function (e) {
   const container = document.getElementById("newImagesPreviewContainer");
   const grid = document.getElementById("newImagesPreviewGrid");
 
   if (!container || !grid) return;
 
-  // 🚀 FIX: Append the newly selected files instead of overwriting the array
   const newlyPickedFiles = Array.from(e.target.files);
   selectedNewFilesArray = selectedNewFilesArray.concat(newlyPickedFiles);
 
-  // 🚀 FIX: Sync our master array back to the actual HTML input container
-  // This keeps the underlying form input aligned with your queue!
   const dataTransfer = new DataTransfer();
   selectedNewFilesArray.forEach(f => dataTransfer.items.add(f));
   this.files = dataTransfer.files;

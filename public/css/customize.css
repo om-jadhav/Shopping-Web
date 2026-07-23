@@ -909,3 +909,79 @@ LARGE DESKTOP
     }
 
 }
+/*=====================================================
+TERMS & CONDITIONS CHECKLIST & MODAL (MINIMAL ADDITIONS)
+=====================================================*/
+
+.terms-group {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #c5c8d0;
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.checkbox-label a {
+    color: var(--accent);
+    text-decoration: underline;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.checkbox-label a:hover {
+    opacity: 0.85;
+}
+
+/* Terms Modal Content */
+.terms-modal-inner {
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.terms-content {
+    overflow-y: auto;
+    padding-right: 12px;
+    max-height: 60vh;
+}
+
+.terms-content h3 {
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin: 16px 0 6px;
+    font-weight: 600;
+}
+
+.terms-content h3:first-child {
+    margin-top: 0;
+}
+
+.terms-content p {
+    font-size: 0.85rem;
+    color: #b5b8c3;
+    line-height: 1.5;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .checkbox-label {
+        font-size: 0.8rem;
+    }
+}

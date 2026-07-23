@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/admin.css" />
   <link rel="stylesheet" href="/css/custom-dashboard.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
 </head>
 
 <body class="page-admin">
@@ -15,45 +16,54 @@
   <div class="tag">IDK Clothing</div>
 
   <div class="admin-wrap">
+    <!-- Header Navigation -->
     <div class="admin-header">
       <h1>Custom Dashboard</h1>
       <div class="links">
         <a href="/admin.html">Manage Products</a>
+        <a href="/admin-orders.html">Store Orders</a> 
         <a href="/offers.html">Manage Offers</a>
         <a href="/completed-orders.html">Completed Orders</a>
         <a href="/products.html">View shop</a>
-        <a href="#" id="logoutLink">Log out</a>
+        <a href="#" id="logoutLink" class="logout-btn">Log out</a>
       </div>
     </div>
 
-    <!-- ===== ADD MATERIAL (compact) ===== -->
+    <!-- ===== ADD / EDIT MATERIAL PANEL ===== -->
     <div class="panel panel-compact">
-      <div class="panel-heading-row">
+      <div class="panel-header panel-heading-row">
         <h2 id="formHeading">Add material</h2>
-        <a href="#" id="cancelEditLink" class="cancel-edit-link">Cancel</a>
+        <a href="#" id="cancelEditLink" class="cancel-link cancel-edit-link" style="display: none;">Cancel</a>
       </div>
+
       <form id="materialForm">
-        <label for="materialName">Name</label>
-        <input id="materialName" type="text" placeholder="Cotton" required />
+        <div class="field-row">
+          <div class="form-group">
+            <label for="materialName">Name *</label>
+            <input id="materialName" type="text" placeholder="e.g., Cotton 100%" required />
+          </div>
 
-        <label for="materialStock">Stock qty</label>
-        <input id="materialStock" type="number" min="0" placeholder="50" required />
+          <div class="form-group">
+            <label for="materialStock">Stock qty *</label>
+            <input id="materialStock" type="number" min="0" placeholder="50" required />
+          </div>
+        </div>
 
-        <button type="submit" id="submitBtn">Add material</button>
+        <button type="submit" id="submitBtn" class="btn-primary">Add material</button>
         <div id="formMsg" class="message"></div>
       </form>
     </div>
 
-    <!-- ===== EXISTING MATERIALS ===== -->
+    <!-- ===== EXISTING MATERIALS PANEL ===== -->
     <div class="panel">
       <h2>Existing materials</h2>
-      <div id="materialList">Loading…</div>
+      <div id="materialList" class="material-list-container">Loading…</div>
     </div>
 
-    <!-- ===== CUSTOM ORDERS ===== -->
+    <!-- ===== CUSTOM ORDERS PANEL ===== -->
     <div class="panel">
       <h2>Custom Orders</h2>
-      <div id="customOrderList">
+      <div id="customOrderList" class="custom-orders-container">
         <p class="stock-note">No custom orders yet — this section will populate once customers start placing custom t-shirt orders.</p>
       </div>
     </div>
@@ -62,6 +72,8 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/custom-dashboard.js"></script>
+  <div id="siteFooter"></div>
+  <script src="/js/footer.js"></script>
 </body>
 
 </html>

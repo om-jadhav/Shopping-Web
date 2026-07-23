@@ -30,7 +30,7 @@ async function getOrdersForUser(userId) {
   return data;
 }
 
-// Admin - every order, with customer profile info joined in for reference
+// Admin - every order, with customer profile info & terms metadata joined in
 async function getAllOrdersForAdmin() {
   const { data, error } = await supabaseAdmin
     .from("custom_orders")

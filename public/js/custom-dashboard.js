@@ -11,12 +11,38 @@ const cancelEditLink = document.getElementById("cancelEditLink");
 let editingMaterialId = null;
 let cachedMaterialsList = [];
 
+// Helper fallbacks in case they are omitted in global api.js
+if (typeof colorNameFromHex !== "function") {
+  window.colorNameFromHex = function (hex) {
+    if (!hex) return "Default";
+    return hex.toUpperCase();
+  };
+}
+
+if (typeof downloadFile !== "function") {
+  window.downloadFile = async function (url, filename) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || "download";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      window.open(url, "_blank");
+    }
+  };
+}
+
 function resetFormState() {
   editingMaterialId = null;
   materialForm.reset();
   formHeading.textContent = "Add material";
   submitBtn.textContent = "Add material";
   cancelEditLink.classList.remove("visible");
+  cancelEditLink.style.display = "none";
 }
 
 cancelEditLink.addEventListener("click", (e) => {
@@ -32,11 +58,12 @@ function enterEditMode(materialId) {
   formHeading.textContent = `Editing: ${material.name}`;
   submitBtn.textContent = "Save Changes";
   cancelEditLink.classList.add("visible");
+  cancelEditLink.style.display = "inline-block";
 
   document.getElementById("materialName").value = material.name || "";
   document.getElementById("materialStock").value = material.stock_quantity ?? 0;
 
-  formHeading.scrollIntoView({ behavior: "smooth" });
+  formHeading.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 materialForm.addEventListener("submit", async (e) => {
@@ -134,7 +161,8 @@ async function loadMaterialList() {
     }
 
     materialList.innerHTML = cachedMaterialsList
-      .map((m) => `
+      .map(
+        (m) => `
         <div class="material-list-item">
           <div class="meta">
             <div class="name">
@@ -157,7 +185,8 @@ async function loadMaterialList() {
             <button class="btn-danger delete-btn" data-delete="${m.id}" data-name="${m.name}">Delete</button>
           </div>
         </div>
-      `)
+      `
+      )
       .join("");
 
     materialList.querySelectorAll(".edit-btn").forEach((btn) => {
@@ -190,7 +219,7 @@ logoutLink.addEventListener("click", async (e) => {
   e.preventDefault();
   try {
     await apiPost("/auth/logout", {}, token);
-  } catch (_) { }
+  } catch (_) {}
   clearToken();
   window.location.href = "/login.html";
 });
@@ -207,6 +236,7 @@ const STATUS_OPTIONS = [
 ];
 
 function formatOrderDate(iso) {
+  if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
@@ -222,10 +252,18 @@ async function updateOrderStatus(id, status) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showToast("Order status updated.", "success");
+    if (typeof showToast === "function") {
+      showToast("Order status updated.", "success");
+    } else {
+      alert("Order status updated.");
+    }
     loadCustomOrders();
   } catch (err) {
-    showToast(err.message, "error");
+    if (typeof showToast === "function") {
+      showToast(err.message, "error");
+    } else {
+      alert(err.message);
+    }
   }
 }
 
@@ -282,7 +320,7 @@ function customOrderCardHtml(order) {
           <div class="order-field"><span class="field-label">Material:</span> ${order.materials?.name || "—"}</div>
           <div class="order-field"><span class="field-label">Color:</span> ${colorNameFromHex(order.color)}</div>
           <div class="order-field"><span class="field-label">Placement:</span> ${placementLabelAdmin(order)}</div>
-          <div class="order-field"><span class="field-label">Quantity:</span> ${breakdown} (${order.total_quantity} total)</div>
+          <div class="order-field"><span class="field-label">Quantity:</span> ${breakdown || order.total_quantity} (${order.total_quantity} total)</div>
           ${order.description ? `<div class="order-field"><span class="field-label">Note:</span> ${order.description}</div>` : ""}
           <div class="order-field order-date"><span class="field-label">Placed:</span> ${formatOrderDate(order.created_at)}</div>
         </div>

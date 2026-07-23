@@ -1,6 +1,7 @@
 // public/js/orders.js
 
-const STATUS_STEPS = [
+// Status pipeline for Custom Orders
+const CUSTOM_STATUS_STEPS = [
   { key: "designing", label: "Designing" },
   { key: "printing", label: "Printing" },
   { key: "shirt_collecting", label: "Collecting" },
@@ -8,18 +9,24 @@ const STATUS_STEPS = [
   { key: "completed", label: "Completed" },
 ];
 
-function statusStepperHtml(status) {
-  // 'reactivated' isn't a pipeline stage - it means admin reopened a
-  // completed order for rework. Show a note instead of a broken stepper.
+// Status pipeline for Regular Store Orders
+const REGULAR_STATUS_STEPS = [
+  { key: "pending", label: "Order Placed" },
+  { key: "paid", label: "Paid" },
+  { key: "shipped", label: "Dispatched" },
+  { key: "delivered", label: "Delivered" },
+];
+
+function statusStepperHtml(status, steps = CUSTOM_STATUS_STEPS) {
   if (status === "reactivated") {
     return `<div class="reactivated-note">This order was reopened for changes and is being reworked.</div>`;
   }
 
-  const currentIdx = STATUS_STEPS.findIndex((s) => s.key === status);
+  const currentIdx = steps.findIndex((s) => s.key === status);
 
   return `
     <div class="status-stepper">
-      ${STATUS_STEPS.map((s, idx) => {
+      ${steps.map((s, idx) => {
         let cls = "";
         if (idx < currentIdx) cls = "done";
         else if (idx === currentIdx) cls = "current";
@@ -30,6 +37,7 @@ function statusStepperHtml(status) {
 }
 
 function formatDate(iso) {
+  if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
@@ -43,7 +51,8 @@ function capitalize(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
-function orderCardHtml(order) {
+// ---- Render Custom Order Card ----
+function customOrderCardHtml(order) {
   const thumbs = [order.front_preview_url, order.back_preview_url].filter(Boolean);
   const breakdown = (order.size_breakdown || [])
     .map((row) => `${row.quantity}&times; ${capitalize(row.gender)} ${row.size}`)
@@ -53,7 +62,7 @@ function orderCardHtml(order) {
 
   return `
     <div class="order-card">
-      <div class="order-type-badge">Custom Order</div>
+      <div class="order-type-badge custom-badge">Custom Order</div>
       <div class="order-card-top">
         <div class="order-thumbs">
           ${thumbs.map((url) => `<img src="${url}" alt="Design preview" class="clickable-thumb" data-full="${url}" />`).join("")}
@@ -68,13 +77,54 @@ function orderCardHtml(order) {
           ${isCompleted ? `<div class="order-field order-date"><span class="field-label">Completed:</span> ${formatDate(order.status_updated_at)}</div>` : ""}
         </div>
       </div>
-      ${statusStepperHtml(order.status)}
+      ${statusStepperHtml(order.status, CUSTOM_STATUS_STEPS)}
+    </div>
+  `;
+}
+
+// ---- Render Regular Shop Order Card (Synced with orderModel.js structure) ----
+function regularOrderCardHtml(order) {
+  const items = order.order_items || [];
+  const isCompleted = order.status === "completed" || order.status === "delivered";
+
+  const itemsHtml = items.map(item => {
+    const product = item.products || {};
+    // image_urls can be an array in Supabase
+    const imageUrl = Array.isArray(product.image_urls) ? product.image_urls[0] : (product.image_urls || '/images/placeholder.png');
+
+    return `
+      <div class="regular-item-row">
+        <img src="${imageUrl}" alt="${product.name || 'Product'}" class="clickable-thumb" data-full="${imageUrl}" />
+        <div>
+          <strong>${product.name || 'Standard Product'}</strong>
+          <div>Qty: ${item.quantity || 1}</div>
+          <div>Price: ₹${item.price_at_purchase || 0}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="order-card">
+      <div class="order-type-badge shop-badge">Standard Purchase</div>
+      <div class="order-card-top">
+        <div class="regular-order-items">
+          ${itemsHtml.length ? itemsHtml : '<div>No item details available</div>'}
+        </div>
+        <div class="order-fields">
+          <div class="order-field"><span class="field-label">Order ID:</span> #${String(order.id).slice(0, 8)}</div>
+          <div class="order-field"><span class="field-label">Total Amount:</span> ₹${order.total_amount || 0}</div>
+          <div class="order-field order-date"><span class="field-label">Placed:</span> ${formatDate(order.created_at)}</div>
+        </div>
+      </div>
+      ${statusStepperHtml(order.status, REGULAR_STATUS_STEPS)}
     </div>
   `;
 }
 
 // ---- Lightbox for enlarging thumbnails ----
 function openLightbox(src) {
+  if (!src) return;
   const modal = document.getElementById("lightboxModal");
   document.getElementById("lightboxImg").src = src;
   modal.classList.add("open");
@@ -90,6 +140,7 @@ function wireLightbox(container) {
   });
 }
 
+// ---- Main Order Loader ----
 async function loadOrders() {
   const token = getToken();
   if (!token) {
@@ -101,18 +152,31 @@ async function loadOrders() {
   const completedContainer = document.getElementById("completedOrdersList");
 
   try {
-    const data = await apiGet("/custom-orders/mine", token);
-    const orders = data.orders || [];
+    // Fetch custom orders AND regular store orders (/api/orders as defined in orderController.js)
+    const [customRes, regularRes] = await Promise.allSettled([
+      apiGet("/custom-orders/mine", token),
+      apiGet("/orders", token)
+    ]);
 
-    const active = orders.filter((o) => o.status !== "completed");
-    const completed = orders.filter((o) => o.status === "completed");
+    const customOrders = (customRes.status === "fulfilled" && customRes.value?.orders) ? customRes.value.orders : [];
+    const regularOrders = (regularRes.status === "fulfilled" && regularRes.value?.orders) ? regularRes.value.orders : [];
+
+    const formattedCustom = customOrders.map(o => ({ ...o, _type: 'custom' }));
+    const formattedRegular = regularOrders.map(o => ({ ...o, _type: 'regular' }));
+
+    const allOrders = [...formattedCustom, ...formattedRegular].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    const active = allOrders.filter((o) => o.status !== "completed" && o.status !== "delivered");
+    const completed = allOrders.filter((o) => o.status === "completed" || o.status === "delivered");
 
     activeContainer.innerHTML = active.length
-      ? active.map(orderCardHtml).join("")
-      : `<p class="empty-state">No active custom orders right now. <a href="/customize.html">Start designing one</a>.</p>`;
+      ? active.map(o => o._type === 'custom' ? customOrderCardHtml(o) : regularOrderCardHtml(o)).join("")
+      : `<p class="empty-state">No active orders right now. <a href="/products.html">Browse Shop</a> or <a href="/customize.html">Design Custom Shirt</a>.</p>`;
 
     completedContainer.innerHTML = completed.length
-      ? completed.map(orderCardHtml).join("")
+      ? completed.map(o => o._type === 'custom' ? customOrderCardHtml(o) : regularOrderCardHtml(o)).join("")
       : `<p class="empty-state">No completed orders yet.</p>`;
 
     wireLightbox(activeContainer);

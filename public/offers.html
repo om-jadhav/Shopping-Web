@@ -10,11 +10,13 @@
 </head>
 
 <body>
+    <div class="tag">IDK Clothing</div>
     <div class="admin-container">
         <div class="admin-header">
             <h1>Manage Offers & Discounts</h1>
             <div class="links">
                 <a href="/admin.html">Manage Products</a>
+                <a href="/admin-orders.html">Store Orders</a> 
                 <a href="/custom-dashboard.html">Custom Dashboard</a>
                 <a href="/completed-orders.html">Completed Orders</a>
                 <a href="/products.html">View Shop</a>
@@ -32,8 +34,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="discountPercentage">Discount Percentage (%)</label>
-                        <input type="number" id="discountPercentage" min="1" max="100" placeholder="e.g., 20"
-                            required />
+                        <input type="number" id="discountPercentage" min="1" max="100" placeholder="e.g., 20" required />
                     </div>
                 </div>
 
@@ -52,13 +53,13 @@
                     <label>Apply Offer To:</label>
                     <div class="filter-row">
                         <div class="filter-group">
-                            <label>Filter Category</label>
+                            <label for="categoryFilter">Filter Category</label>
                             <select id="categoryFilter">
                                 <option value="all">All Categories</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label>Filter Gender</label>
+                            <label for="genderFilter">Filter Gender</label>
                             <select id="genderFilter">
                                 <option value="all">All Genders</option>
                                 <option value="men">Men</option>
@@ -75,7 +76,7 @@
                         <span id="selectionCount">0 products selected</span>
                     </div>
 
-                    <small class="tip">💡 <em>Tip: Click and drag to select multiple items!</em></small>
+                    <small class="tip">💡 <em>Tip: Click and drag over products to quickly select multiple items!</em></small>
 
                     <div id="dragSelectWrapper">
                         <div id="inventoryGrid" class="inventory-grid">
@@ -84,9 +85,10 @@
                     </div>
                 </div>
 
-                <button type="submit" id="submitOfferBtn">Create & Apply Offer</button>
-                <button type="button" id="cancelEditBtn" class="hidden">Cancel Edit</button>
-                <div id="offerFormMsg" class="message"></div>
+                <div class="form-actions">
+                    <button type="submit" id="submitOfferBtn">Create & Apply Offer</button>
+                    <button type="button" id="cancelEditBtn" class="hidden">Cancel Edit</button>
+                </div>
             </form>
         </div>
 
@@ -96,7 +98,6 @@
                 <p class="loading-text">Loading active campaigns...</p>
             </div>
         </div>
-
     </div>
 
     <template id="campaignItemTemplate">
@@ -105,30 +106,23 @@
                 <div>
                     <strong class="campaign-title"></strong>
                     <div class="campaign-summary">
-
                         <div class="campaign-status-wrapper">
                             <span class="campaign-status"></span>
                         </div>
-
                         <div>
-                            <strong>Starts:</strong>
-                            <span class="campaign-start"></span>
+                            <strong>Starts:</strong> <span class="campaign-start"></span>
                         </div>
-
                         <div>
-                            <strong>Ends:</strong>
-                            <span class="campaign-end"></span>
+                            <strong>Ends:</strong> <span class="campaign-end"></span>
                         </div>
-
                         <div>
                             <strong class="campaign-count"></strong>
                         </div>
-
                     </div>
                 </div>
                 <div class="campaign-actions">
-                    <button class="edit-campaign-btn">Edit</button>
-                    <button class="delete-campaign-btn">End Offer</button>
+                    <button type="button" class="edit-campaign-btn">Edit</button>
+                    <button type="button" class="delete-campaign-btn">End Offer</button>
                 </div>
             </div>
             <div class="campaign-products-inline"></div>
@@ -139,5 +133,4 @@
     <div id="siteFooter"></div>
     <script src="/js/footer.js"></script>
 </body>
-
 </html>
