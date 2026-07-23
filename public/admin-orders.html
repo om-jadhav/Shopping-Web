@@ -1,41 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Completed Custom Orders</title>
+  <title>Admin - Store Orders</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/admin.css" />
   <link rel="stylesheet" href="/css/custom-dashboard.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
 </head>
-
 <body class="page-admin">
 
   <div class="tag">IDK Clothing</div>
 
   <div class="admin-wrap">
     <div class="admin-header">
-      <h1>Completed Custom Orders</h1>
+      <h1>Standard Store Orders</h1>
       <div class="links">
         <a href="/admin.html">Manage Products</a>
-        <a href="/admin-orders.html">Store Orders</a>   
         <a href="/offers.html">Manage Offers</a>
         <a href="/custom-dashboard.html">Custom Dashboard</a>
+        <a href="/completed-orders.html">Completed Custom Orders</a>
         <a href="/products.html">View shop</a>
-        <a href="#" id="logoutLink">Log out</a>
+        <a href="#" id="logoutLink" class="logout-btn">Log out</a>
       </div>
     </div>
 
     <div class="panel">
-      <h2>Completed Custom Orders</h2>
-      <div id="completedOrderList">Loading…</div>
+      <h2>Active & Past Customer Orders</h2>
+      <div id="adminOrdersList" class="product-list-container">Loading orders…</div>
     </div>
-
   </div>
 
   <script src="/js/api.js"></script>
-  <script src="/js/completed-orders.js"></script>
+  <script src="/js/admin-orders.js"></script>
+  <div id="siteFooter"></div>
+  <script src="/js/footer.js"></script>
 </body>
-
 </html>

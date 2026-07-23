@@ -38,22 +38,26 @@ function resetForm() {
 }
 
 async function fetchInventory() {
-    const res = await authFetch("/api/products");
-    const data = await res.json();
-    allProducts = Array.isArray(data) ? data : (data.products || data.data || []);
+    try {
+        const res = await authFetch("/api/products");
+        const data = await res.json();
+        allProducts = Array.isArray(data) ? data : (data.products || data.data || []);
 
-    const catSelect = document.getElementById("categoryFilter");
-    const uniqueCategories = [...new Set(allProducts.map(p => p.category?.name).filter(c => c && typeof c === 'string'))];
+        const catSelect = document.getElementById("categoryFilter");
+        const uniqueCategories = [...new Set(allProducts.map(p => p.category?.name).filter(c => c && typeof c === 'string'))];
 
-    catSelect.innerHTML = '<option value="all">All Categories</option>';
-    uniqueCategories.sort().forEach(catName => {
-        const option = document.createElement("option");
-        option.value = catName;
-        option.textContent = catName;
-        catSelect.appendChild(option);
-    });
+        catSelect.innerHTML = '<option value="all">All Categories</option>';
+        uniqueCategories.sort().forEach(catName => {
+            const option = document.createElement("option");
+            option.value = catName;
+            option.textContent = catName;
+            catSelect.appendChild(option);
+        });
 
-    applyFilters();
+        applyFilters();
+    } catch (err) {
+        console.error("Error fetching inventory:", err);
+    }
 }
 
 function applyFilters() {
@@ -71,7 +75,7 @@ function applyFilters() {
 
 function resolveProductImage(prod) {
     if (!prod) return "";
-    if (Array.isArray(prod.image_urls) && prod.image_urls[0] !== "null") return prod.image_urls[0];
+    if (Array.isArray(prod.image_urls) && prod.image_urls[0] && prod.image_urls[0] !== "null") return prod.image_urls[0];
     if (prod.image_url && typeof prod.image_url === "string" && prod.image_url !== "null") return prod.image_url;
     return "";
 }
@@ -80,6 +84,11 @@ function renderGrid() {
     const grid = document.getElementById("inventoryGrid");
     if (!grid) return;
     grid.innerHTML = "";
+
+    if (!filteredProducts.length) {
+        grid.innerHTML = `<p class="loading-text">No products match your filters.</p>`;
+        return;
+    }
 
     filteredProducts.forEach(p => {
         const productId = p.id || p._id;
@@ -97,18 +106,17 @@ function renderGrid() {
 
         card.innerHTML = `
             ${isDisabled ? `<div class="active-offer-badge">${badgeText}</div>` : ""}
-            ${imgSrc ? `<img src="${imgSrc}" class="inventory-img" />` : `<div class="inventory-img-placeholder">No Image</div>`}
+            ${imgSrc ? `<img src="${imgSrc}" class="inventory-img" alt="${p.name || ''}" />` : `<div class="inventory-img-placeholder">No Image</div>`}
             <p class="inventory-title">${p.name || 'Unnamed Product'}</p>
         `;
 
         if (!isDisabled) {
-            card.onclick = () => toggleSelection(p.id.toString(), card);
+            card.onclick = () => toggleSelection(productId.toString(), card);
         }
         grid.appendChild(card);
     });
 }
 
-// Helper for single click and drag
 function toggleSelection(id, cardElement) {
     if (selectedProductIds.has(id)) {
         selectedProductIds.delete(id);
@@ -126,7 +134,7 @@ async function handleFormSubmit(e) {
 
     const payload = {
         name: document.getElementById("offerName").value,
-        percentage: document.getElementById("discountPercentage").value,
+        percentage: Number(document.getElementById("discountPercentage").value),
         startDate: startInput ? new Date(startInput).toISOString() : null,
         endDate: endInput ? new Date(endInput).toISOString() : null,
         productIds: Array.from(selectedProductIds)
@@ -151,7 +159,7 @@ function setupEventListeners() {
     document.getElementById("genderFilter").onchange = applyFilters;
 
     document.getElementById("selectAllBtn").onclick = () => {
-        filteredProducts.forEach(p => selectedProductIds.add(p.id.toString()));
+        filteredProducts.forEach(p => selectedProductIds.add(String(p.id || p._id)));
         renderGrid();
         updateUI();
     };
@@ -187,102 +195,77 @@ function enterEditMode(camp) {
         camp.end_date
             ? new Date(camp.end_date).toISOString().slice(0, 16)
             : "";
-    selectedProductIds = new Set(camp.product_ids.map(String));
+    selectedProductIds = new Set((camp.product_ids || []).map(String));
     updateUI();
     renderGrid();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function loadOffers() {
-    const res = await authFetch("/api/offers");
-    const { offers } = await res.json();
-    const list = document.getElementById("activeOffersList");
-    list.innerHTML = "";
+    try {
+        const res = await authFetch("/api/offers");
+        const data = await res.json();
+        const offers = data.offers || (Array.isArray(data) ? data : []);
+        const list = document.getElementById("activeOffersList");
+        list.innerHTML = "";
 
-    offers.forEach(camp => {
-        const clone = document.getElementById("campaignItemTemplate").content.cloneNode(true);
-        clone.querySelector(".campaign-title").textContent = `${camp.name} (${camp.percentage}% OFF)`;
-        clone.querySelector(".campaign-count").textContent = `Linked: ${camp.productsList?.length || 0}`;
+        if (!offers.length) {
+            list.innerHTML = `<p class="loading-text">No active or upcoming campaigns created.</p>`;
+            return;
+        }
 
-        const now = new Date();
+        offers.forEach(camp => {
+            const clone = document.getElementById("campaignItemTemplate").content.cloneNode(true);
+            clone.querySelector(".campaign-title").textContent = `${camp.name} (${camp.percentage}% OFF)`;
+            clone.querySelector(".campaign-count").textContent = `Linked: ${camp.productsList?.length || camp.product_ids?.length || 0} products`;
 
-        const startDate = camp.start_date
-            ? new Date(camp.start_date)
-            : null;
+            const now = new Date();
+            const startDate = camp.start_date ? new Date(camp.start_date) : null;
+            const endDate = camp.end_date ? new Date(camp.end_date) : null;
 
-        const endDate = camp.end_date
-            ? new Date(camp.end_date)
-            : null;
+            const formatDate = (date) =>
+                date
+                    ? date.toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    })
+                    : "Not Set";
 
-        const formatDate = (date) =>
-            date
-                ? date.toLocaleString("en-IN", {
-                    timeZone: "Asia/Kolkata",
-                    dateStyle: "medium",
-                    timeStyle: "short"
-                })
-                : "Not Set";
+            let status = "Upcoming";
 
-        let status = "Upcoming";
-
-        if (startDate && endDate) {
-            if (now < startDate)
-                status = "Upcoming";
-            else if (now >= startDate && now <= endDate)
+            if (startDate && endDate) {
+                if (now < startDate) status = "Upcoming";
+                else if (now >= startDate && now <= endDate) status = "Active";
+                else status = "Expired";
+            } else if (!startDate && endDate) {
+                status = now <= endDate ? "Active" : "Expired";
+            } else {
                 status = "Active";
-            else
-                status = "Expired";
-        }
-        else if (!startDate && endDate) {
-            status = now <= endDate ? "Active" : "Expired";
-        }
-        else {
-            status = "Active";
-        }
-
-        const statusEl = clone.querySelector(".campaign-status");
-
-        statusEl.textContent = status;
-
-        statusEl.classList.remove(
-            "status-active",
-            "status-upcoming",
-            "status-expired"
-        );
-
-        if (status === "Active") {
-            statusEl.classList.add("status-active");
-        }
-        else if (status === "Upcoming") {
-            statusEl.classList.add("status-upcoming");
-        }
-        else {
-            statusEl.classList.add("status-expired");
-        }
-        clone.querySelector(".campaign-start").textContent = formatDate(startDate);
-        clone.querySelector(".campaign-end").textContent = formatDate(endDate);
-
-        clone.querySelector(".edit-campaign-btn").onclick = () => enterEditMode(camp);
-        clone.querySelector(".delete-campaign-btn").onclick = async () => {
-            if (confirm("End this offer?")) {
-                await authFetch(`/api/offers/${camp.id}`, { method: "DELETE" });
-                loadOffers(); fetchInventory();
             }
-        };
-        list.appendChild(clone);
-    });
-}
 
-// when building product selection dropdown for an offer, include offer percentage in option text
-function populateProductSelect(products) {
-    const select = document.getElementById('productSelect');
-    select.innerHTML = '';
-    products.forEach(p => {
-        const productOffer = p.offer || p.offers || null;
-        const offerText = productOffer ? ` (${productOffer.name} - ${productOffer.percentage}%)` : '';
-        const opt = document.createElement('option');
-        opt.value = p._id || p.id;
-        opt.textContent = `${p.name}${offerText}`;
-        select.appendChild(opt);
-    });
+            const statusEl = clone.querySelector(".campaign-status");
+            statusEl.textContent = status;
+            statusEl.classList.remove("status-active", "status-upcoming", "status-expired");
+
+            if (status === "Active") statusEl.classList.add("status-active");
+            else if (status === "Upcoming") statusEl.classList.add("status-upcoming");
+            else statusEl.classList.add("status-expired");
+
+            clone.querySelector(".campaign-start").textContent = formatDate(startDate);
+            clone.querySelector(".campaign-end").textContent = formatDate(endDate);
+
+            clone.querySelector(".edit-campaign-btn").onclick = () => enterEditMode(camp);
+            clone.querySelector(".delete-campaign-btn").onclick = async () => {
+                if (confirm("End this offer?")) {
+                    await authFetch(`/api/offers/${camp.id}`, { method: "DELETE" });
+                    loadOffers(); 
+                    fetchInventory();
+                }
+            };
+            list.appendChild(clone);
+        });
+    } catch (err) {
+        console.error("Error loading offers:", err);
+    }
 }

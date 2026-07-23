@@ -139,6 +139,8 @@ async function createCustomOrder(req, res) {
       description: description || null,
       size_breakdown: breakdown,
       total_quantity: totalQuantity,
+      terms_accepted: true,
+      terms_accepted_at: new Date().toISOString(),
     });
 
     res.status(201).json({ message: "Custom order placed successfully.", order });

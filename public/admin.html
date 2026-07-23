@@ -20,37 +20,44 @@
       <div class="links">
         <a href="/offers.html" id="nav-offers">Manage Offers</a>
         <a href="/custom-dashboard.html">Custom Dashboard</a>
+        <a href="/admin-orders.html">Store Orders</a> 
         <a href="/completed-orders.html">Completed Orders</a>
         <a href="/products.html">View shop</a>
-        <a href="#" id="logoutLink">Log out</a>
+        <a href="#" id="logoutLink" class="logout-btn">Log out</a>
       </div>
     </div>
 
+    <!-- Product Form Panel -->
     <div class="panel">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="panel-header">
         <h2 id="formHeading">Add a new product</h2>
-        <a href="#" id="cancelEditLink" style="display: none; color: #d9534f; font-size: 0.9rem;">Cancel Edit</a>
+        <a href="#" id="cancelEditLink" style="display: none;" class="cancel-link">Cancel Edit</a>
       </div>
-      <form id="productForm">
-        <label for="name">Product name</label>
-        <input id="name" type="text" placeholder="Classic Crew T-Shirt" required />
 
-        <label for="description">Description</label>
-        <textarea id="description" placeholder="100% cotton, regular fit."></textarea>
+      <form id="productForm">
+        <div class="form-group">
+          <label for="name">Product Name *</label>
+          <input id="name" type="text" placeholder="Classic Crew T-Shirt" required />
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="100% cotton, regular fit."></textarea>
+        </div>
 
         <div class="field-row">
-          <div>
+          <div class="form-group">
             <label for="brand">Brand</label>
             <input id="brand" type="text" placeholder="Shopline" />
           </div>
-          <div>
-            <label for="price">Price (₹)</label>
+          <div class="form-group">
+            <label for="price">Price (₹) *</label>
             <input id="price" type="number" min="0" step="0.01" placeholder="799" required />
           </div>
         </div>
 
         <div class="field-row">
-          <div>
+          <div class="form-group">
             <label for="gender">Gender</label>
             <select id="gender">
               <option value="unisex">Unisex</option>
@@ -59,45 +66,53 @@
               <option value="kids">Kids</option>
             </select>
           </div>
-          <div>
+          <div class="form-group">
             <label for="category">Category</label>
             <select id="category"></select>
           </div>
         </div>
 
-        <label for="productImages">Product Images * (Select up to 10)</label>
-        <input id="productImages" type="file" accept="image/*" multiple required />
-        <small style="color: #888; display: block; margin-top: -5px; margin-bottom: 15px;">
-          Tip: Hold Ctrl (Win) or Cmd (Mac) to select multiple images.
-        </small>
+        <div class="form-group">
+          <label for="productImages">Product Images * (Select up to 10)</label>
+          <input id="productImages" type="file" accept="image/*" multiple required />
+          <small class="help-text">
+            Tip: Hold Ctrl (Win) or Cmd (Mac) to select multiple images.
+          </small>
+        </div>
 
-        <!-- 🚀 UPDATED: Precision-blue class configuration for brand-new local files -->
+        <!-- Newly Selected Local Images -->
         <div id="newImagesPreviewContainer" class="image-preview-container new-upload-box">
           <label>Newly Selected Images Preview:</label>
           <div id="newImagesPreviewGrid" class="image-preview-grid"></div>
         </div>
 
-        <!-- UPDATED: Precision-blue class configuration for existing files management -->
+        <!-- Existing Active Product Images -->
         <div id="existingImagesContainer" class="image-preview-container">
           <label>Current Active Images (Click ✕ to remove):</label>
           <div id="existingImagesGrid" class="image-preview-grid"></div>
         </div>
 
-        <label>Variants (size / color / stock)</label>
-        <div class="variant-labels">
-          <span>Size</span><span>Color</span><span>Stock</span><span></span>
+        <div class="form-group">
+          <label>Variants (size / color / stock)</label>
+          <div class="variant-labels">
+            <span>Size</span>
+            <span>Color</span>
+            <span>Stock</span>
+            <span></span>
+          </div>
+          <div id="variantRows"></div>
+          <button type="button" id="addVariantBtn" class="add-variant-btn">+ Add another variant</button>
         </div>
-        <div id="variantRows"></div>
-        <button type="button" id="addVariantBtn" class="add-variant-btn">+ Add another variant</button>
 
-        <button type="submit" id="submitBtn">Create product</button>
+        <button type="submit" id="submitBtn" class="btn-primary">Create product</button>
         <div id="formMsg" class="message"></div>
       </form>
     </div>
 
+    <!-- Existing Products Panel -->
     <div class="panel">
       <h2>Existing products</h2>
-      <div id="productList">Loading…</div>
+      <div id="productList" class="product-list-container">Loading…</div>
     </div>
   </div>
 

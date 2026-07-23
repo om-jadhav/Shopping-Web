@@ -238,7 +238,7 @@ button:disabled {
   border: 1px solid var(--surface-border);
   color: var(--text);
 
-  margin-top: 28px;
+  margin-top: 0px;
 }
 
 /* =========================================================

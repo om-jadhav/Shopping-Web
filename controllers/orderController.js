@@ -29,4 +29,33 @@ async function getMyOrders(req, res) {
   }
 }
 
-module.exports = { checkout, getMyOrders };
+// GET /api/orders/admin/all
+async function getAllOrdersAdmin(req, res) {
+  try {
+    const orders = await orderModel.getAllOrdersForAdmin();
+    res.json({ orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// PATCH /api/orders/:id/status
+async function updateStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: "Status is required." });
+    }
+
+    const updatedOrder = await orderModel.updateOrderStatus(id, status);
+    res.json({ message: "Order status updated.", order: updatedOrder });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+}
+
+module.exports = { checkout, getMyOrders, getAllOrdersAdmin, updateStatus };

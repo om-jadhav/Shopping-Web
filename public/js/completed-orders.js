@@ -4,7 +4,8 @@ const completedOrderList = document.getElementById("completedOrderList");
 const logoutLink = document.getElementById("logoutLink");
 
 function formatOrderDate(iso) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 function designThumbRowHtml(order, label, thumbUrl, hqUrl, filenameSuffix) {
@@ -62,6 +63,7 @@ function completedOrderCardHtml(order) {
           <div class="order-field"><span class="field-label">Placement:</span> ${placementLabelAdmin(order)}</div>
           <div class="order-field"><span class="field-label">Quantity:</span> ${breakdown} (${order.total_quantity} total)</div>
           ${order.description ? `<div class="order-field"><span class="field-label">Note:</span> ${order.description}</div>` : ""}
+          <div class="order-field"><span class="field-label">Terms Accepted:</span> ${order.terms_accepted ? `Yes (${formatOrderDate(order.terms_accepted_at)})` : "No"}</div>
           <div class="order-field order-date"><span class="field-label">Placed:</span> ${formatOrderDate(order.created_at)}</div>
           <div class="order-field order-date"><span class="field-label">Completed:</span> ${formatOrderDate(order.status_updated_at)}</div>
         </div>
