@@ -5,11 +5,12 @@ async function getActiveOffersMap(productIds) {
   if (!productIds.length) return {};
 
   const nowIso = new Date().toISOString();
+  const productIdSet = new Set(productIds.map(String));   // ← normalize once
 
   const { data, error } = await supabaseAdmin
     .from("offers")
     .select("*")
-    .lte("start_date", nowIso)
+    .or(`start_date.is.null,start_date.lte.${nowIso}`)
     .or(`end_date.is.null,end_date.gte.${nowIso}`);
 
   if (error) throw error;
@@ -18,9 +19,10 @@ async function getActiveOffersMap(productIds) {
   for (const offer of data) {
     const ids = offer.product_ids || [];
     for (const pid of ids) {
-      if (!productIds.includes(pid)) continue;
-      if (!map[pid] || offer.percentage > map[pid].percentage) {
-        map[pid] = offer;
+      if (!productIdSet.has(String(pid))) continue;   // ← string-safe comparison
+      const key = String(pid);
+      if (!map[key] || offer.percentage > map[key].percentage) {
+        map[key] = offer;
       }
     }
   }
@@ -46,12 +48,19 @@ async function getCartByUserId(userId) {
   const productIds = [...new Set(data.map((item) => item.product_id))];
   const offersMap = await getActiveOffersMap(productIds);
 
-  return data.map((item) => ({
-    ...item,
-    products: item.products
-      ? { ...item.products, offer_percentage: offersMap[item.product_id]?.percentage || 0 }
-      : item.products,
-  }));
+  return data.map((item) => {
+    const offer = offersMap[item.product_id];
+    return {
+      ...item,
+      products: item.products
+        ? {
+          ...item.products,
+          offer_percentage: offer?.percentage || 0,
+          offer_name: offer?.name || null,   // ← new
+        }
+        : item.products,
+    };
+  });
 }
 
 async function getVariantStock(variantId) {

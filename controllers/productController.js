@@ -11,12 +11,12 @@ async function listProducts(req, res) {
 
     const normalizedProducts = Array.isArray(products)
       ? products.map((p) => ({
-          ...p,
-          id: p.id || p._id,
-          _id: p._id || p.id,
-          image_urls: p.image_urls || p.imageUrls || [],
-          product_variants: p.product_variants || p.variants || [],
-        }))
+        ...p,
+        id: p.id || p._id,
+        _id: p._id || p.id,
+        image_urls: p.image_urls || p.imageUrls || [],
+        product_variants: p.product_variants || p.variants || [],
+      }))
       : products;
 
     const offerIds = Array.isArray(normalizedProducts)
@@ -36,19 +36,19 @@ async function listProducts(req, res) {
 
     const productsWithOffer = Array.isArray(normalizedProducts)
       ? normalizedProducts.map((p) => {
-          const offer = offersById.get(p.offer_id) || null;
-          const offerPct = Number(p.offer_percentage ?? offer?.percentage ?? 0);
+        const offer = offersById.get(p.offer_id) || null;
+        const offerPct = Number(p.offer_percentage ?? offer?.percentage ?? 0);
 
-          return {
-            ...p,
-            offer_id: p.offer_id ?? offer?.id ?? null,
-            offer,
-            offers: offer,
-            offer_percentage: offerPct,
-            end_date: p.end_date ?? p.offer_end_date ?? offer?.end_date ?? null,
-            offer_end_date: p.offer_end_date ?? p.end_date ?? offer?.end_date ?? null,
-          };
-        })
+        return {
+          ...p,
+          offer_id: p.offer_id ?? offer?.id ?? null,
+          offer,
+          offers: offer,
+          offer_percentage: offerPct,
+          end_date: p.end_date ?? p.offer_end_date ?? offer?.end_date ?? null,
+          offer_end_date: p.offer_end_date ?? p.end_date ?? offer?.end_date ?? null,
+        };
+      })
       : normalizedProducts;
 
     res.json({ products: productsWithOffer });
@@ -71,7 +71,29 @@ async function listProductsAdmin(req, res) {
 async function getProduct(req, res) {
   try {
     const product = await productModel.getProductById(req.params.id);
-    res.json({ product });
+
+    let offer = null;
+    if (product.offer_id) {
+      const { data } = await supabaseAdmin
+        .from("offers")
+        .select("*")
+        .eq("id", product.offer_id)
+        .maybeSingle();
+      offer = data || null;
+    }
+
+    const offerPct = Number(offer?.percentage || 0);
+
+    res.json({
+      product: {
+        ...product,
+        offer,
+        offers: offer,
+        offer_percentage: offerPct,
+        end_date: offer?.end_date || null,
+        offer_end_date: offer?.end_date || null,
+      },
+    });
   } catch (err) {
     res.status(404).json({ error: "Product not found." });
   }
@@ -253,28 +275,79 @@ async function updateProduct(req, res) {
     const product = await productModel.updateProduct(req.params.id, updates);
 
     if (variantsArray !== null) {
-      // 2. Clear out any old variants for this specific product ID
-      await supabaseAdmin
+      const { data: existingVariants } = await supabaseAdmin
         .from("product_variants")
-        .delete()
+        .select("id")
         .eq("product_id", req.params.id);
 
-      // 3. If there are fresh/edited variants, insert them into the blank slate
-      if (variantsArray.length > 0) {
-        const variantsToInsert = variantsArray.map(v => ({
+      const existingIds = (existingVariants || []).map(v => v.id);
+      const submittedIds = variantsArray.filter(v => v.id).map(v => Number(v.id));
+      const idsToDelete = existingIds.filter(id => !submittedIds.includes(id));
+      const idsToUpdate = variantsArray.filter(v => v.id && existingIds.includes(Number(v.id)));
+      const toInsert = variantsArray.filter(
+        v => !v.id || !existingIds.includes(Number(v.id))
+      );
+
+      for (const id of idsToDelete) {
+
+        // Is this variant used in an order?
+        const { data: orderItem } = await supabaseAdmin
+          .from("order_items")
+          .select("id")
+          .eq("variant_id", id)
+          .limit(1)
+          .maybeSingle();
+
+        if (orderItem) {
+
+          console.log(
+            `Variant ${id} is referenced in an order. Setting stock to 0 instead of deleting.`
+          );
+
+          const { error } = await supabaseAdmin
+            .from("product_variants")
+            .update({
+              stock_quantity: 0
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+        } else {
+
+          const { error } = await supabaseAdmin
+            .from("product_variants")
+            .delete()
+            .eq("id", id);
+
+          if (error) throw error;
+
+        }
+      }
+
+      for (const v of idsToUpdate) {
+        const { error: updErr } = await supabaseAdmin
+          .from("product_variants")
+          .update({
+            size: v.size || null,
+            color: v.color || null,
+            stock_quantity: v.stockQuantity ?? 0,
+          })
+          .eq("id", Number(v.id));
+        if (updErr) throw new Error(`Failed to update variant: ${updErr.message}`);
+      }
+
+      if (toInsert.length > 0) {
+        const rowsToInsert = toInsert.map(v => ({
           product_id: req.params.id,
           size: v.size || null,
           color: v.color || null,
-          stock_quantity: v.stockQuantity !== undefined ? v.stockQuantity : (v.stock_quantity || 0)
+          stock_quantity: v.stockQuantity ?? 0,
         }));
-
-        const { error: variantError } = await supabaseAdmin
+        const { error: insErr } = await supabaseAdmin
           .from("product_variants")
-          .insert(variantsToInsert);
-
-        if (variantError) {
-          throw new Error(`Failed to update product variants: ${variantError.message}`);
-        }
+          .insert(rowsToInsert);
+        if (insErr) throw new Error(`Failed to insert new variants: ${insErr.message}`);
       }
     }
 
