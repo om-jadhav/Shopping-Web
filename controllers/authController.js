@@ -5,6 +5,33 @@
 const { supabase } = require("../config/supabaseClient");
 const profileModel = require("../models/profileModel");
 
+/**
+ * Validates password strength against a high-security policy:
+ * - Minimum 10 characters
+ * - At least one uppercase letter
+ * - At least one lowercase letter
+ * - At least one digit
+ * - At least one special character
+ */
+function validateStrongPassword(password) {
+  if (!password || password.length < 10) {
+    return "Password must be at least 10 characters long.";
+  }
+  if (!/[A-Z]/.test(password)) {
+    return "Password must contain at least one uppercase letter (A-Z).";
+  }
+  if (!/[a-z]/.test(password)) {
+    return "Password must contain at least one lowercase letter (a-z).";
+  }
+  if (!/[0-9]/.test(password)) {
+    return "Password must contain at least one number (0-9).";
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return "Password must contain at least one special character (e.g., !@#$%^&*).";
+  }
+  return null;
+}
+
 // POST /api/auth/signup
 async function signup(req, res) {
   const { email, password, fullName } = req.body;
@@ -12,8 +39,11 @@ async function signup(req, res) {
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });
   }
-  if (password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters." });
+
+  // High password policy check
+  const passwordError = validateStrongPassword(password);
+  if (passwordError) {
+    return res.status(400).json({ error: passwordError });
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -68,6 +98,7 @@ async function login(req, res) {
   });
 }
 
+// POST /api/auth/logout
 // POST /api/auth/logout
 async function logout(req, res) {
   const { error } = await supabase.auth.signOut();
