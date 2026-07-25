@@ -15,61 +15,19 @@ if (togglePassword) {
   });
 }
 
-// Safely initialize Supabase using backend config endpoint and catch OAuth tokens
-let supabaseClient = null;
-
-async function initSupabaseClient() {
-  try {
-    const res = await fetch("/api/config/supabase");
-    const config = await res.json();
-    
-    if (config.url && config.anonKey) {
-      supabaseClient = window.supabase.createClient(config.url, config.anonKey);
-
-      // --- CATCH GOOGLE OAUTH REDIRECT & SAVE TOKEN ---
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
-      if (session && session.access_token) {
-        // Save it in the exact format your app uses for email/password login
-        localStorage.setItem("token", session.access_token);
-        
-        // Optional: Redirect immediately to products if they just landed back from Google
-        if (window.location.search.includes("code=") || window.location.hash.includes("access_token=")) {
-          window.location.href = "/products.html";
-        }
-      }
-    } else {
-      console.error("Supabase config endpoint returned missing keys:", config);
-    }
-  } catch (err) {
-    console.error("Failed to initialize Supabase client:", err);
-  }
-}
-
-// Initialize immediately on load
-initSupabaseClient();
-
 // Handle Google Login Click
 if (googleLoginBtn) {
   googleLoginBtn.addEventListener("click", async () => {
-    // If client isn't ready yet, wait briefly for initialization to finish
-    if (!supabaseClient) {
-      showMessage(msg, "Connecting to authentication service... Please try again in a second.", "error");
-      await initSupabaseClient();
-      if (!supabaseClient) return;
-    }
-
     try {
-      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      const sb = await getSupabaseClient();
+      if (!sb) throw new Error("Auth service unavailable.");
+
+      const { data, error } = await sb.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/products.html`,
-        },
+        options: { redirectTo: `${window.location.origin}/products.html` },
       });
       if (error) throw error;
-      
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      if (data?.url) window.location.href = data.url;
     } catch (err) {
       showMessage(msg, err.message, "error");
     }

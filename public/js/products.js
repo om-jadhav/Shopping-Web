@@ -3,45 +3,6 @@ const grid = document.getElementById("grid");
 const categoryFilter = document.getElementById("categoryFilter");
 const genderFilter = document.getElementById("genderFilter");
 
-// --- Catch and Exchange Supabase Google OAuth Code on Redirect ---
-(async function handleOAuthRedirect() {
-  try {
-    const res = await fetch("/api/config/supabase");
-    const config = await res.json();
-    
-    if (config.url && config.anonKey) {
-      const sb = window.supabase.createClient(config.url, config.anonKey, {
-        auth: {
-          persistSession: true,
-          detectSessionInUrl: true
-        }
-      });
-      
-      // 1. If Supabase redirected back with a code in the URL, explicitly exchange it
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      
-      if (code) {
-        const { data, error } = await sb.auth.exchangeCodeForSession(code);
-        if (!error && data?.session?.access_token) {
-          localStorage.setItem("token", data.session.access_token);
-          // Clean up the URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-          return;
-        }
-      }
-
-      // 2. Fallback check for existing active session state
-      const { data: { session } } = await sb.auth.getSession();
-      if (session && session.access_token) {
-        localStorage.setItem("token", session.access_token);
-      }
-    }
-  } catch (err) {
-    console.error("Error handling OAuth session capture:", err);
-  }
-})();
-
 async function loadCategories() {
   try {
     const data = await apiGet("/categories");

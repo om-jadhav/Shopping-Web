@@ -2,7 +2,7 @@
 // "Controller" layer: receives req/res, validates input, talks to
 // Supabase + Models, sends back JSON. No direct DB queries here.
 
-const { supabase } = require("../config/supabaseClient");
+const { supabase, supabaseAdmin } = require("../config/supabaseClient");
 const profileModel = require("../models/profileModel");
 
 /**
@@ -99,7 +99,6 @@ async function login(req, res) {
 }
 
 // POST /api/auth/logout
-// POST /api/auth/logout
 async function logout(req, res) {
   const { error } = await supabase.auth.signOut();
   if (error) {
@@ -139,17 +138,11 @@ async function forgotPassword(req, res) {
 // POST /api/auth/update-password (Protected via authMiddleware)
 async function updatePassword(req, res) {
   const { password } = req.body;
-
   const passwordError = validateStrongPassword(password);
-  if (passwordError) {
-    return res.status(400).json({ error: passwordError });
-  }
+  if (passwordError) return res.status(400).json({ error: passwordError });
 
-  const { data, error } = await supabase.auth.updateUser({ password });
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
+  const { data, error } = await supabaseAdmin.auth.admin.updateUserById(req.user.id, { password });
+  if (error) return res.status(400).json({ error: error.message });
 
   return res.status(200).json({ message: "Password successfully updated." });
 }
