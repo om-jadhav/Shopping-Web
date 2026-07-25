@@ -37,6 +37,14 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/custom-orders", customOrderRoutes);
 
+// Provide public Supabase credentials safely to the frontend
+app.get("/api/config/supabase", (req, res) => {
+  res.json({
+    url: process.env.SUPABASE_URL,
+    anonKey: process.env.SUPABASE_ANON_KEY
+  });
+});
+
 // Simple health check - good way to confirm the server + env vars are alive
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });

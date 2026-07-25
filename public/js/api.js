@@ -87,6 +87,45 @@ async function downloadFile(url, filename) {
   }
 }
 
+let _sbClientPromise = null;
+function getSupabaseClient() {
+  if (!_sbClientPromise) {
+    _sbClientPromise = (async () => {
+      const res = await fetch("/api/config/supabase");
+      const config = await res.json();
+      if (!config.url || !config.anonKey || !window.supabase) return null;
+      return window.supabase.createClient(config.url, config.anonKey, {
+        auth: { persistSession: true, detectSessionInUrl: true },
+      });
+    })();
+  }
+  return _sbClientPromise;
+}
+
+async function captureOAuthSession() {
+  const hasOAuthParams =
+    window.location.search.includes("code=") ||
+    window.location.hash.includes("access_token=");
+  if (!hasOAuthParams) return;
+
+  try {
+    const sb = await getSupabaseClient();
+    if (!sb) return;
+
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (code) {
+      const { data, error } = await sb.auth.exchangeCodeForSession(code);
+      if (!error && data?.session?.access_token) saveToken(data.session.access_token);
+    } else {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.access_token) saveToken(session.access_token);
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } catch (err) {
+    console.error("Error capturing OAuth session:", err);
+  }
+}
+
 // Small floating confirmation popup - styled inline so it works on any page
 // without needing its own CSS file. type: "success" | "error".
 function showToast(text, type = "success") {
