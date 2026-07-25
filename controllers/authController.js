@@ -118,4 +118,40 @@ async function getMe(req, res) {
   }
 }
 
-module.exports = { signup, login, logout, getMe };
+// POST /api/auth/forgot-password
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Email is required." });
+  }
+
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${req.protocol}://${req.get("host")}/reset-password.html`,
+  });
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  return res.status(200).json({ message: "Password reset link sent to your email." });
+}
+
+// POST /api/auth/update-password (Protected via authMiddleware)
+async function updatePassword(req, res) {
+  const { password } = req.body;
+
+  const passwordError = validateStrongPassword(password);
+  if (passwordError) {
+    return res.status(400).json({ error: passwordError });
+  }
+
+  const { data, error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  return res.status(200).json({ message: "Password successfully updated." });
+}
+
+module.exports = { signup, login, logout, getMe, forgotPassword, updatePassword };
