@@ -153,13 +153,13 @@ function renderProduct(product) {
         <label class="info-label">Size</label>
         <div class="size-selector" id="sizeSwatches">
           ${sizes
-            .map((s) => {
-              const stock = stockForSize(variants, s, colors.length ? selectedColor : null);
-              const isSelected = s === selectedSize;
-              const isOut = stock === 0;
-              return `<button type="button" class="size-option ${isSelected ? "active" : ""} ${isOut ? "out-of-stock" : ""}" data-size="${s}">${s}</button>`;
-            })
-            .join("")}
+        .map((s) => {
+          const stock = stockForSize(variants, s, colors.length ? selectedColor : null);
+          const isSelected = s === selectedSize;
+          const isOut = stock === 0;
+          return `<button type="button" class="size-option ${isSelected ? "active" : ""} ${isOut ? "out-of-stock" : ""}" data-size="${escapeHtml(s)}">${escapeHtml(s)}</button>`;
+        })
+        .join("")}
         </div>
       </div>
     `;
@@ -172,20 +172,20 @@ function renderProduct(product) {
         <label class="info-label">Color</label>
         <div class="color-selector" id="colorSwatches">
           ${colors
-            .map((c) => {
-              const stock = stockForColor(variants, c, sizes.length ? selectedSize : null);
-              const isSelected = c === selectedColor;
-              const isOut = stock === 0;
-              
-              const colorLower = c.toLowerCase();
-              let styleAttr = `background:${c};`;
-              let extraClass = "";
-              if (colorLower === "white") extraClass = "color-white";
-              else if (colorLower === "black") extraClass = "color-black";
+        .map((c) => {
+          const stock = stockForColor(variants, c, sizes.length ? selectedSize : null);
+          const isSelected = c === selectedColor;
+          const isOut = stock === 0;
 
-              return `<div class="color-option ${extraClass} ${isSelected ? "active" : ""} ${isOut ? "out-of-stock" : ""}" style="${styleAttr}" data-color="${c}" title="${c}"></div>`;
-            })
-            .join("")}
+          const colorLower = c.toLowerCase();
+          let styleAttr = `background:${escapeHtml(c)};`;
+          let extraClass = "";
+          if (colorLower === "white") extraClass = "color-white";
+          else if (colorLower === "black") extraClass = "color-black";
+
+          return `<div class="color-option ${extraClass} ${isSelected ? "active" : ""} ${isOut ? "out-of-stock" : ""}" style="${styleAttr}" data-color="${escapeHtml(c)}" title="${escapeHtml(c)}"></div>`;
+        })
+        .join("")}
         </div>
       </div>
     `;
@@ -196,15 +196,15 @@ function renderProduct(product) {
     return `
       <div class="thumbnail-row">
         ${imagesArray
-          .map((url, idx) => {
-            const isSelected = idx === activeImageIndex;
-            return `
+        .map((url, idx) => {
+          const isSelected = idx === activeImageIndex;
+          return `
               <div class="thumbnail ${isSelected ? "active" : ""}" data-index="${idx}">
                 <img src="${url}" alt="Thumbnail ${idx + 1}" />
               </div>
             `;
-          })
-          .join("")}
+        })
+        .join("")}
       </div>
     `;
   }
@@ -312,15 +312,15 @@ function renderProduct(product) {
             <button class="wishlist-btn" id="wishlistTopBtn" aria-label="Add to Wishlist">
               <i class="fa-regular fa-heart"></i>
             </button>
-            <img src="${mainImage}" alt="${product.name}" id="mainDisplayImage" />
+            <img src="${mainImage}" alt="${escapeHtml(product.name)}" id="mainDisplayImage" />
           </div>
           ${galleryThumbnailsHtml()}
         </div>
 
         <!-- Info Column -->
         <div class="product-info">
-          ${categoryName ? `<div class="product-category">${categoryName}</div>` : ""}
-          <h1 class="product-title">${product.name}</h1>
+          ${categoryName ? `<div class="product-category">${escapeHtml(categoryName)}</div>` : ""}
+          <h1 class="product-title">${escapeHtml(product.name)}</h1>
           
           <!-- Dynamic Header Rating Placeholder -->
           <div class="product-rating" id="headerRatingContainer">
@@ -349,13 +349,12 @@ function renderProduct(product) {
 
         <div class="description-box">
           <div id="tab-description" class="tab-content active">
-            <p>${product.description || "No description provided for this product."}</p>
+            <p>${escapeHtml(product.description) || "No description provided for this product."}</p>
           </div>
-          ${
-            product.specifications
-              ? `<div id="tab-details" class="tab-content" style="display:none;"><p>${product.specifications}</p></div>`
-              : ""
-          }
+          ${product.specifications
+        ? `<div id="tab-details" class="tab-content" style="display:none;"><p>${escapeHtml(product.specifications)}</p></div>`
+        : ""
+      }
           <div id="tab-shipping" class="tab-content" style="display:none;">
             <p>Free standard delivery on eligible orders. Standard 7-day hassle-free return policy applies.</p>
           </div>
@@ -396,7 +395,7 @@ function renderProduct(product) {
       el.addEventListener("click", () => {
         const idx = Number(el.dataset.index);
         activeImageIndex = idx;
-        
+
         const mainImg = document.getElementById("mainDisplayImage");
         if (mainImg) mainImg.src = imagesArray[idx];
 
@@ -637,37 +636,37 @@ async function loadReviews(productId) {
             
             <div class="rating-bars" style="margin-top: 15px;">
               ${[5, 4, 3, 2, 1]
-                .map((star) => {
-                  const cnt = counts[star] || 0;
-                  const pct = Math.round((cnt / totalCount) * 100);
-                  return `
+        .map((star) => {
+          const cnt = counts[star] || 0;
+          const pct = Math.round((cnt / totalCount) * 100);
+          return `
                     <div class="bar-row">
                       <span>${star}★</span>
                       <div class="bar-track"><div class="bar-fill" style="width: ${pct}%;"></div></div>
                       <span>(${cnt})</span>
                     </div>
                   `;
-                })
-                .join("")}
+        })
+        .join("")}
             </div>
           </div>
 
           <div class="review-list">
             ${reviews
-              .map(
-                (r) => `
+        .map(
+          (r) => `
               <div class="review-card">
-                <div class="review-avatar">${(r.user_name || r.user?.name || "U")[0].toUpperCase()}</div>
-                <div class="review-body">
-                  <h4>${r.user_name || r.user?.name || "Verified Customer"}</h4>
-                  <div class="review-stars">${starsHtml(r.rating || 5)}</div>
-                  <div class="review-time">${r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recently"}</div>
-                  ${r.comment ? `<div class="review-text">${r.comment}</div>` : ""}
-                </div>
+                <div class="review-avatar">${escapeHtml((r.user_name || r.user?.name || "U")[0].toUpperCase())}</div>
+<div class="review-body">
+  <h4>${escapeHtml(r.user_name || r.user?.name || "Verified Customer")}</h4>
+  <div class="review-stars">${starsHtml(r.rating || 5)}</div>
+  <div class="review-time">${r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recently"}</div>
+  ${r.comment ? `<div class="review-text">${escapeHtml(r.comment)}</div>` : ""}
+</div>
               </div>
             `
-              )
-              .join("")}
+        )
+        .join("")}
           </div>
 
         </div>

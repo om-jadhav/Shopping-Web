@@ -22,6 +22,14 @@ function statusStepperHtml(status, steps = CUSTOM_STATUS_STEPS) {
     return `<div class="reactivated-note">This order was reopened for changes and is being reworked.</div>`;
   }
 
+  if (status === "cancelled") {
+    return `<div class="cancelled-note">This order was cancelled.</div>`;
+  }
+
+  if (status === "failed") {
+    return `<div class="failed-note">This order's payment failed. Please contact support if you were charged.</div>`;
+  }
+
   const currentIdx = steps.findIndex((s) => s.key === status);
 
   return `
@@ -72,7 +80,7 @@ function customOrderCardHtml(order) {
           <div class="order-field"><span class="field-label">Color:</span> ${colorNameFromHex(order.color)}</div>
           <div class="order-field"><span class="field-label">Placement:</span> ${placementLabel(order)}</div>
           <div class="order-field"><span class="field-label">Quantity:</span> ${breakdown} (${order.total_quantity} total)</div>
-          ${order.description ? `<div class="order-field"><span class="field-label">Note:</span> ${order.description}</div>` : ""}
+          ${order.description ? `<div class="order-field"><span class="field-label">Note:</span> ${escapeHtml(order.description)}</div>` : ""}
           <div class="order-field order-date"><span class="field-label">Placed:</span> ${formatDate(order.created_at)}</div>
           ${isCompleted ? `<div class="order-field order-date"><span class="field-label">Completed:</span> ${formatDate(order.status_updated_at)}</div>` : ""}
         </div>
@@ -85,11 +93,8 @@ function customOrderCardHtml(order) {
 // ---- Render Regular Shop Order Card (Synced with orderModel.js structure) ----
 function regularOrderCardHtml(order) {
   const items = order.order_items || [];
-  const isCompleted = order.status === "completed" || order.status === "delivered";
-
   const itemsHtml = items.map(item => {
     const product = item.products || {};
-    // image_urls can be an array in Supabase
     const imageUrl = Array.isArray(product.image_urls) ? product.image_urls[0] : (product.image_urls || '/images/placeholder.png');
 
     return `
@@ -140,6 +145,12 @@ function wireLightbox(container) {
   });
 }
 
+// A regular order is "settled" (done, one way or another) once it's
+// delivered, cancelled, or failed - none of those will ever progress further.
+function isRegularOrderSettled(status) {
+  return status === "delivered" || status === "cancelled" || status === "failed";
+}
+
 // ---- Main Order Loader ----
 async function loadOrders() {
   const token = getToken();
@@ -152,7 +163,6 @@ async function loadOrders() {
   const completedContainer = document.getElementById("completedOrdersList");
 
   try {
-    // Fetch custom orders AND regular store orders (/api/orders as defined in orderController.js)
     const [customRes, regularRes] = await Promise.allSettled([
       apiGet("/custom-orders/mine", token),
       apiGet("/orders", token)
@@ -168,8 +178,15 @@ async function loadOrders() {
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
 
-    const active = allOrders.filter((o) => o.status !== "completed" && o.status !== "delivered");
-    const completed = allOrders.filter((o) => o.status === "completed" || o.status === "delivered");
+    const active = allOrders.filter((o) => {
+      if (o._type === "custom") return o.status !== "completed";
+      return !isRegularOrderSettled(o.status);
+    });
+
+    const completed = allOrders.filter((o) => {
+      if (o._type === "custom") return o.status === "completed";
+      return isRegularOrderSettled(o.status);
+    });
 
     activeContainer.innerHTML = active.length
       ? active.map(o => o._type === 'custom' ? customOrderCardHtml(o) : regularOrderCardHtml(o)).join("")

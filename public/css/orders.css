@@ -382,3 +382,24 @@
   gap: 8px;
   max-width: 250px; /* Keeps the items column compact */
 }
+.cancelled-note {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: rgba(154, 160, 173, 0.12);
+  border: 1px solid rgba(154, 160, 173, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.failed-note {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--error);
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+}

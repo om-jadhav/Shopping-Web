@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./routes/authRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -21,6 +22,34 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// ===========================
+// Rate limiting
+// ===========================
+
+// Strict limiter for auth endpoints — these are the actual brute-force /
+// credential-stuffing targets (repeated login/signup attempts).
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please try again in a few minutes." },
+});
+
+// Lighter general limiter as a baseline safety net across the whole API,
+// so no single client can hammer any endpoint at unlimited speed.
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please slow down." },
+});
+
+app.use("/api", generalLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/signup", authLimiter);
 
 // Serve the frontend (plain HTML/CSS/JS) from /public
 app.use(express.static(path.join(__dirname, "public")));

@@ -9,7 +9,6 @@ async function requireAdmin(req, res, next) {
     }
     next();
   } catch (err) {
-    console.error("requireAdmin error:", err); // <-- temporary debug line
     return res.status(500).json({ error: "Could not verify admin access." });
   }
 }
