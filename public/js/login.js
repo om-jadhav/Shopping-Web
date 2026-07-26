@@ -5,12 +5,32 @@ const submitBtn = document.getElementById("submitBtn");
 const togglePassword = document.getElementById("togglePassword");
 const passwordInput = document.getElementById("password");
 const rememberMeInput = document.getElementById("rememberMe");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
 
 if (togglePassword) {
   togglePassword.addEventListener("click", () => {
     const isHidden = passwordInput.type === "password";
     passwordInput.type = isHidden ? "text" : "password";
     togglePassword.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+  });
+}
+
+// Handle Google Login Click
+if (googleLoginBtn) {
+  googleLoginBtn.addEventListener("click", async () => {
+    try {
+      const sb = await getSupabaseClient();
+      if (!sb) throw new Error("Auth service unavailable.");
+
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/products.html` },
+      });
+      if (error) throw error;
+      if (data?.url) window.location.href = data.url;
+    } catch (err) {
+      showMessage(msg, err.message, "error");
+    }
   });
 }
 

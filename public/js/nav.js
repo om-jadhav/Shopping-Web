@@ -1,11 +1,12 @@
 async function renderNav() {
 
+    await captureOAuthSession();
     const nav = document.getElementById("navLinks");
     if (!nav) return;
 
     const current = window.location.pathname;
     const token = getToken();
-    
+
     function makeLinks(list) {
         return list.map(link => `
             <a href="${link.href}"
@@ -20,54 +21,51 @@ async function renderNav() {
     if (!token) {
 
         links = [
-            {href:"/products.html",label:"Shop"},
-            {href:"/customize.html",label:"Custom T-Shirt"},
-            {href:"/login.html",label:"Login"},
-            {href:"/signup.html",label:"Signup"}
+            { href: "/products.html", label: "Shop" },
+            { href: "/customize.html", label: "Custom T-Shirt" },
+            { href: "/login.html", label: "Login" },
+            { href: "/signup.html", label: "Signup" }
         ];
 
         nav.innerHTML = makeLinks(links);
 
     } else {
 
-        try{
+        try {
 
-            const me = await apiGet("/auth/me",token);
+            const me = await apiGet("/auth/me", token);
 
-            const admin = me.profile?.role==="admin";
+            const admin = me.profile?.role === "admin";
 
             links = [
-                {href:"/products.html",label:"Shop"},
-                ...(admin?[]:[{href:"/customize.html",label:"Custom T-Shirt"}]),
-                ...(admin?[]:[{href:"/orders.html",label:"Orders"}]),
+                { href: "/products.html", label: "Shop" },
+                ...(admin ? [] : [{ href: "/customize.html", label: "Custom T-Shirt" }]),
+                ...(admin ? [] : [{ href: "/orders.html", label: "Orders" }]),
                 {
-                    href:admin?"/admin.html":"/index.html",
-                    label:admin?"Admin":"My Account"
+                    href: admin ? "/admin.html" : "/index.html",
+                    label: admin ? "Admin" : "My Account"
                 },
-                ...(admin?[]:[{href:"/cart.html",label:"Cart"}])
+                ...(admin ? [] : [{ href: "/cart.html", label: "Cart" }])
             ];
 
             nav.innerHTML =
                 makeLinks(links) +
                 `<a href="#" id="logoutBtn">Logout</a>`;
 
-            document
-            .getElementById("logoutBtn")
-            .onclick = async e=>{
-
+            document.getElementById("logoutBtn").onclick = async e => {
                 e.preventDefault();
+                try { await apiPost("/auth/logout", {}, token); } catch (e) { }
 
-                try{
-                    await apiPost("/auth/logout",{},token);
-                }catch(e){}
+                try {
+                    const sb = await getSupabaseClient();
+                    if (sb) await sb.auth.signOut();   // <-- this clears the browser-persisted session
+                } catch (e) { }
 
                 clearToken();
-
                 location.reload();
-
             };
 
-        }catch{
+        } catch {
 
             clearToken();
 
@@ -76,13 +74,13 @@ async function renderNav() {
         }
 
     }
-const toggle = document.getElementById("menuToggle");
+    const toggle = document.getElementById("menuToggle");
 
-if (toggle) {
-    toggle.onclick = () => {
-        nav.classList.toggle("open");
-    };
-}
+    if (toggle) {
+        toggle.onclick = () => {
+            nav.classList.toggle("open");
+        };
+    }
 }
 
 renderNav();
