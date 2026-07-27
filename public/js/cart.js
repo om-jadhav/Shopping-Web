@@ -42,11 +42,11 @@ function renderCart(items) {
     return `
           <div class="cart-item ${unavailable ? "cart-item-unavailable" : ""}" data-id="${item.id}">
             <div class="cart-item-img">
-              ${image ? `<img src="${image}" alt="${product?.name || ""}" />` : '<div class="no-image-placeholder">No image</div>'}
+              ${image ? `<img src="${image}" alt="${escapeHtml(product?.name || "")}" />` : '<div class="no-image-placeholder">No image</div>'}
             </div>
             <div class="cart-item-info">
-              <div class="cart-item-name">${product?.name || "Unknown product"}</div>
-              ${variant ? `<div class="cart-item-variant">${[variant.size, variant.color].filter(Boolean).join(" / ")}</div>` : ""}
+              <div class="cart-item-name">${escapeHtml(product?.name || "Unknown product")}</div>
+              ${variant ? `<div class="cart-item-variant">${[variant.size, variant.color].filter(Boolean).map(escapeHtml).join(" / ")}</div>` : ""}
               ${unavailable
         ? `<div class="cart-item-unavailable-badge">No longer available</div>`
         : pct > 0
@@ -55,7 +55,7 @@ function renderCart(items) {
                       <span class="cart-item-price-discounted">₹${price}</span>
                       <span class="cart-item-price-original">₹${product?.price}</span>
                     </div>
-                    <div class="cart-item-offer-name">${product?.offer_name || `${pct}% OFF`}</div>
+                    <div class="cart-item-offer-name">${escapeHtml(product?.offer_name) || `${pct}% OFF`}</div>
                   `
           : `<div class="cart-item-price">₹${price}</div>`
       }

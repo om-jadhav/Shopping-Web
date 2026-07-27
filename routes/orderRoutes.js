@@ -1,19 +1,9 @@
-// routes/orderRoutes.js
 const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/orderController");
 
-// Import middleware - check your exact file export names
-const authMiddleware = require("../middleware/authMiddleware");
-
-// Support flexible export naming (requireAuth or verifyToken)
-const requireAuth = authMiddleware.requireAuth || authMiddleware.verifyToken || authMiddleware;
-const requireAdmin = authMiddleware.requireAdmin || authMiddleware.isAdmin;
-
-// Sanity Check Debugger (Optional)
-if (!orderController.getAllOrdersAdmin) console.error("CRITICAL: orderController.getAllOrdersAdmin is undefined!");
-if (!requireAuth) console.error("CRITICAL: requireAuth middleware is undefined!");
-if (!requireAdmin) console.error("CRITICAL: requireAdmin middleware is undefined!");
+const { requireAuth } = require("../middleware/authMiddleware");
+const { requireAdmin } = require("../middleware/adminMiddleware");
 
 // Customer Routes
 router.post("/checkout", requireAuth, orderController.checkout);

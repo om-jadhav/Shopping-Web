@@ -2,6 +2,8 @@
 const orderModel = require("../models/orderModel");
 const profileModel = require("../models/profileModel");
 
+const VALID_ORDER_STATUSES = ["pending", "paid", "failed", "shipped", "delivered", "cancelled"];
+
 // POST /api/orders/checkout
 async function checkout(req, res) {
   try {
@@ -46,8 +48,10 @@ async function updateStatus(req, res) {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!status) {
-      return res.status(400).json({ error: "Status is required." });
+    if (!status || !VALID_ORDER_STATUSES.includes(status)) {
+      return res.status(400).json({
+        error: `Status must be one of: ${VALID_ORDER_STATUSES.join(", ")}.`,
+      });
     }
 
     const updatedOrder = await orderModel.updateOrderStatus(id, status);

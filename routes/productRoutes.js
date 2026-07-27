@@ -1,7 +1,7 @@
 // routes/productRoutes.js
 const express = require("express");
 const router = express.Router();
-const multer = require("multer"); 
+const multer = require("multer");
 
 const productController = require("../controllers/productController");
 const { requireAuth } = require("../middleware/authMiddleware");
@@ -12,7 +12,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     // UPDATED: Raised limit to 15MB per image so high-res phone cameras pass cleanly
-    fileSize: 15 * 1024 * 1024, 
+    fileSize: 15 * 1024 * 1024,
   },
 });
 
@@ -32,6 +32,6 @@ router.patch(
   requireAdmin,
   productController.updateProductStatus
 );
-router.put("/:id", requireAuth, requireAdmin, upload.array("images", 10), productController.updateProduct);router.delete("/:id", requireAuth, requireAdmin, productController.deleteProduct);
+router.put("/:id", requireAuth, requireAdmin, upload.array("images", 10), productController.updateProduct); router.delete("/:id", requireAuth, requireAdmin, productController.deleteProduct);
 
 module.exports = router;

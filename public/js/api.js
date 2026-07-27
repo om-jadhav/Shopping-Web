@@ -156,3 +156,14 @@ function showToast(text, type = "success") {
     setTimeout(() => toast.remove(), 250);
   }, 2500);
 }
+// Escapes HTML special characters so user-generated text can never be
+// interpreted as markup/script when inserted via innerHTML.
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
