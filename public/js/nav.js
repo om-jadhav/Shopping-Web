@@ -62,7 +62,7 @@ async function renderNav() {
                 } catch (e) { }
 
                 clearToken();
-                location.reload();
+                window.location.href = "/logout.html";
             };
 
         } catch {
