@@ -111,10 +111,48 @@ async function updateOrderStatus(orderId, status) {
   return data;
 }
 
+// Add these functions to models/orderModel.js
+
+async function attachRazorpayOrderId(orderId, razorpayOrderId) {
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .update({ razorpay_order_id: razorpayOrderId })
+    .eq("id", orderId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function getOrderByIdForUser(orderId, userId) {
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+async function markOrderPaid(orderId, paymentId) {
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .update({ status: "paid", razorpay_payment_id: paymentId })
+    .eq("id", orderId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 module.exports = { 
   checkoutCart, 
   getOrdersByUserId, 
   hasUserPurchasedProduct,
   getAllOrdersForAdmin,
-  updateOrderStatus 
+  updateOrderStatus,
+  attachRazorpayOrderId,
+  getOrderByIdForUser,
+  markOrderPaid 
 };
