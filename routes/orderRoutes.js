@@ -13,4 +13,7 @@ router.get("/", requireAuth, orderController.getMyOrders);
 router.get("/admin/all", requireAuth, requireAdmin, orderController.getAllOrdersAdmin);
 router.patch("/:id/status", requireAuth, requireAdmin, orderController.updateStatus);
 
+router.post("/:id/verify-payment", requireAuth, orderController.verifyPayment);
+router.post("/:id/payment-failed", requireAuth, orderController.markPaymentFailed);
+
 module.exports = router;

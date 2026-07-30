@@ -202,8 +202,54 @@ async function handleCheckout() {
       return;
     }
 
-    alert("Order placed successfully!");
-    window.location.href = "/products.html";
+    const { order, razorpayOrderId, amount, currency, keyId } = result;
+
+    const rzp = new Razorpay({
+      key: keyId,
+      amount,
+      currency,
+      name: "IDK Clothing",
+      description: `Order #${String(order.id).slice(0, 8)}`,
+      order_id: razorpayOrderId,
+      
+      handler: async function (response) {
+        try {
+          const verifyRes = await fetch(`/api/orders/${order.id}/verify-payment`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed.");
+
+          alert("Payment successful! Order placed.");
+          window.location.href = "/orders.html";
+        } catch (err) {
+          alert(err.message);
+          window.location.href = "/orders.html";
+        }
+      },
+      modal: {
+        ondismiss: async function () {
+          await fetch(`/api/orders/${order.id}/payment-failed`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          checkoutBtn.disabled = false;
+          checkoutBtn.textContent = "Proceed to Checkout";
+        },
+      },
+      theme: { color: "#ff7a52" },
+    });
+
+    rzp.open();
   } catch (err) {
     console.error(err);
     alert("Something went wrong during checkout.");
