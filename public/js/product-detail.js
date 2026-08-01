@@ -541,7 +541,7 @@ async function handleAddToCart(product, variants, getSelection, isBuyNow = false
       token
     );
 
-    window.location.href = isBuyNow ? "/checkout.html" : "/cart.html";
+    window.location.href = isBuyNow ? "/cart.html" : "/cart.html";
   } catch (err) {
     if (addBtn) {
       addBtn.disabled = false;

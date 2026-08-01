@@ -15,11 +15,18 @@ function formatDate(iso) {
 }
 
 function renderOrderCard(order) {
-  const profile = order.profiles || order.user || {};
+  // The backend (models/orderModel.js -> getAllOrdersForAdmin) sends the
+  // customer's info under `order.customer` (it also flattens it to
+  // order.customer_name / order.customer_phone / order.shipping_address,
+  // but `order.customer` has everything). There is no `order.profiles` or
+  // `order.user` field - that was the bug: this file was reading a key
+  // that the API never sends, so it always fell back to {}.
+  const profile = order.customer || {};
   const items = order.order_items || [];
 
-  const address = [profile.address_line1, profile.address_line2, profile.city, profile.state, profile.postal_code, profile.country]
-    .filter(Boolean).join(", ");
+  const address = profile.shipping_address ||
+    [profile.address_line1, profile.address_line2, profile.city, profile.state, profile.postal_code, profile.country]
+      .filter(Boolean).join(", ");
 
   const itemsHtml = items.map(item => {
     const product = item.products || {};
