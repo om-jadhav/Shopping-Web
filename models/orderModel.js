@@ -1,12 +1,6 @@
 // models/orderModel.js
 const { supabaseAdmin } = require("../config/supabaseClient");
 
-async function checkoutCart(userId) {
-  const { data, error } = await supabaseAdmin.rpc("checkout_cart", { p_user_id: userId });
-  if (error) throw parseCheckoutError(error);
-  return data;
-}
-
 function parseCheckoutError(error) {
   const msg = error.message || "";
 
@@ -135,19 +129,35 @@ async function getOrderByIdForUser(orderId, userId) {
   return data;
 }
 
-async function markOrderPaid(orderId, paymentId) {
-  const { data, error } = await supabaseAdmin
-    .from("orders")
-    .update({ status: "paid", razorpay_payment_id: paymentId })
-    .eq("id", orderId)
-    .select()
-    .single();
-  if (error) throw error;
+async function createPendingOrder(userId) {
+  const { data, error } = await supabaseAdmin.rpc("create_pending_order", { p_user_id: userId });
+  if (error) throw parseCheckoutError(error);
   return data;
 }
 
+async function markOrderPaid(orderId, userId, paymentId) {
+  const { data, error } = await supabaseAdmin.rpc("confirm_order_payment", {
+    p_order_id: orderId,
+    p_user_id: userId,
+    p_payment_id: paymentId,
+  });
+  if (error) throw parseCheckoutError(error);
+  return data;
+}
+async function checkoutCart(userId) {
+  const { data, error } = await supabase
+    .rpc('create_pending_order', { p_user_id: userId });
+
+  if (error) {
+    console.error('Error in checkoutCart RPC:', error);
+    throw new Error(error.message || 'Failed to process checkout');
+  }
+
+  return data;
+}
 module.exports = { 
   checkoutCart, 
+  createPendingOrder,
   getOrdersByUserId, 
   hasUserPurchasedProduct,
   getAllOrdersForAdmin,

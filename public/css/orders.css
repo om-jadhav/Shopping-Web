@@ -403,3 +403,15 @@
   padding: 3px 8px;
   border-radius: 6px;
 }
+.download-bill-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.download-bill-link:hover {
+  text-decoration: underline;
+}
