@@ -28,14 +28,18 @@ async function getOrdersByUserId(userId) {
     .from("orders")
     .select(`
       id, total_amount, status, created_at,
-      order_items ( id, product_id, variant_id, quantity, price_at_purchase,
-        products ( name, image_urls ) )
+      order_items (
+        id, product_id, variant_id, quantity, price_at_purchase,
+        products ( name, image_urls )
+      )
     `)
     .eq("user_id", userId)
+    .neq("status", "pending")
+    .neq("status", "failed")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data || [];
 }
 
 async function hasUserPurchasedProduct(userId, productId) {
@@ -50,47 +54,106 @@ async function hasUserPurchasedProduct(userId, productId) {
   if (error) throw error;
   return data.length > 0;
 }
-// Add to models/orderModel.js
+
+function buildShippingAddress(profile) {
+  if (!profile) return "—";
+
+  const parts = [
+    profile.address_line1,
+    profile.address_line2,
+    profile.city,
+    profile.state,
+    profile.postal_code,
+    profile.country,
+  ].filter(Boolean);
+
+  return parts.length ? parts.join(", ") : "—";
+}
+
+function normalizeProfile(profile) {
+  if (!profile) {
+    return {
+      full_name: "Unknown",
+      phone: "No phone",
+      shipping_address: "—",
+      shipping_address_text: "—",
+      address: "—",
+    };
+  }
+
+  const shippingAddress = buildShippingAddress(profile);
+
+  return {
+    ...profile,
+    full_name: profile.full_name || "Unknown",
+    phone: profile.phone || "No phone",
+    customer_name: profile.full_name || "Unknown",
+    customer_phone: profile.phone || "No phone",
+    shipping_address: shippingAddress,
+    shipping_address_text: shippingAddress,
+    address: shippingAddress,
+  };
+}
 
 async function getAllOrdersForAdmin() {
-  // 1. Fetch all orders with order items and product details
   const { data: orders, error: ordersError } = await supabaseAdmin
     .from("orders")
     .select(`
-      id, user_id, total_amount, status, created_at,
-      order_items ( id, product_id, variant_id, quantity, price_at_purchase,
-        products ( name, image_urls ) )
+      id,
+      user_id,
+      total_amount,
+      status,
+      created_at,
+      order_items (
+        id,
+        product_id,
+        variant_id,
+        quantity,
+        price_at_purchase,
+        products ( name, image_urls )
+      )
     `)
+    .neq("status", "pending")
+    .neq("status", "failed")
     .order("created_at", { ascending: false });
 
   if (ordersError) throw ordersError;
-
   if (!orders || orders.length === 0) return [];
 
-  // 2. Collect unique user_ids from orders
   const userIds = [...new Set(orders.map((o) => o.user_id).filter(Boolean))];
 
-  // 3. Fetch matching customer profiles
   let profilesMap = {};
+
   if (userIds.length > 0) {
-    const { data: profiles, error: profilesError } = await supabaseAdmin
+    const { data: profilesById } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, phone, address_line1, address_line2, city, state, postal_code, country")
       .in("id", userIds);
 
-    if (!profilesError && profiles) {
-      profilesMap = profiles.reduce((acc, prof) => {
-        acc[prof.id] = prof;
-        return acc;
-      }, {});
+    for (const profile of profilesById || []) {
+      const key = profile.id;
+      if (!key) continue;
+
+      if (!profilesMap[key]) {
+        profilesMap[key] = profile;
+      }
     }
   }
 
-  // 4. Attach profile object to each order
-  return orders.map((order) => ({
-    ...order,
-    profiles: profilesMap[order.user_id] || {}
-  }));
+  return (orders || []).map((order) => {
+    const profile = profilesMap[order.user_id];
+    const customer = normalizeProfile(profile);
+
+    return {
+      ...order,
+      customer,
+      customer_name: customer.full_name,
+      customer_phone: customer.phone,
+      shipping_address: customer.shipping_address,
+      shipping_address_text: customer.shipping_address,
+      address: customer.shipping_address,
+    };
+  });
 }
 
 async function updateOrderStatus(orderId, status) {
@@ -129,9 +192,161 @@ async function getOrderByIdForUser(orderId, userId) {
   return data;
 }
 
-async function createPendingOrder(userId) {
-  const { data, error } = await supabaseAdmin.rpc("create_pending_order", { p_user_id: userId });
-  if (error) throw parseCheckoutError(error);
+async function createPendingOrder(userId, razorpayOrderId = null) {
+  const { data: cartItems, error: cartErr } = await supabaseAdmin
+    .from("cart_items")
+    .select(`
+      product_id,
+      variant_id,
+      quantity,
+      products(id, price, is_active),
+      product_variants(id, stock_quantity)
+    `)
+    .eq("user_id", userId);
+
+  if (cartErr) throw cartErr;
+  if (!cartItems || cartItems.length === 0) throw new Error("CART_EMPTY");
+
+  let total = 0;
+
+  for (const ci of cartItems) {
+    const p = ci.products || {};
+    const pv = ci.product_variants || {};
+    const unitPrice = p.price ?? 0;
+
+    if (p.is_active === false) {
+      throw new Error(`PRODUCT_UNAVAILABLE:${ci.product_id}`);
+    }
+
+    if (ci.variant_id) {
+      const available = typeof pv.stock_quantity === "number" ? pv.stock_quantity : 0;
+      if (available < ci.quantity) {
+        throw new Error(`INSUFFICIENT_VARIANT_STOCK:${ci.variant_id}`);
+      }
+    }
+
+    total += unitPrice * ci.quantity;
+  }
+
+  const { data: order, error: orderErr } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      user_id: userId,
+      total_amount: total,
+      status: "pending",
+      razorpay_order_id: razorpayOrderId,
+    })
+    .select()
+    .single();
+
+  if (orderErr) throw orderErr;
+  return order;
+}
+
+async function finalizeOrderAfterPayment(orderId, userId, paymentId) {
+  const { data: cartItems, error: cartErr } = await supabaseAdmin
+    .from("cart_items")
+    .select(`
+      product_id,
+      variant_id,
+      quantity,
+      products(id, price)
+    `)
+    .eq("user_id", userId);
+
+  if (cartErr) throw cartErr;
+  if (!cartItems || cartItems.length === 0) throw new Error("CART_EMPTY");
+
+  const orderItems = cartItems.map((ci) => ({
+    order_id: orderId,
+    product_id: ci.product_id,
+    variant_id: ci.variant_id,
+    quantity: ci.quantity,
+    price_at_purchase: ci.products?.price ?? 0,
+  }));
+
+  const { error: itemsErr } = await supabaseAdmin
+    .from("order_items")
+    .insert(orderItems);
+
+  if (itemsErr) throw itemsErr;
+
+  // Payment is already verified by this point (verifyPayment checked the
+  // Razorpay signature before calling this function), so the customer has
+  // definitely been charged. That means we must NOT throw out of this loop
+  // and abandon the order - if a decrement fails partway we log it for the
+  // admin to fix by hand instead, and still finish placing the order.
+  const decremented = [];
+  for (const ci of cartItems) {
+    if (!ci.variant_id) continue; // no variant on this line item, nothing to decrement
+    try {
+      await decrementVariantStock(ci.variant_id, ci.quantity);
+      decremented.push({ variantId: ci.variant_id, qty: ci.quantity });
+    } catch (stockErr) {
+      console.error(
+        `[STOCK] Failed to decrement variant ${ci.variant_id} by ${ci.quantity} for order ${orderId}:`,
+        stockErr.message
+      );
+      // Best-effort rollback of whatever we already decremented in this
+      // same checkout, so one failing item doesn't leave the others wrong.
+      for (const done of decremented) {
+        await decrementVariantStock(done.variantId, -done.qty).catch(() => {});
+      }
+      break;
+    }
+  }
+
+  const { data: order, error: updateErr } = await supabaseAdmin
+    .from("orders")
+    .update({
+      status: "paid",
+      razorpay_payment_id: paymentId,
+    })
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (updateErr) throw updateErr;
+
+  const { error: clearErr } = await supabaseAdmin
+    .from("cart_items")
+    .delete()
+    .eq("user_id", userId);
+
+  if (clearErr) throw clearErr;
+
+  return order;
+}
+
+// Atomically reduces a variant's stock by qty (pass a negative qty to add
+// stock back, e.g. for rollback). Mirrors materialModel.decrementStock -
+// the actual decrement happens inside a Postgres function so a stock check
+// and the write can't race with another checkout happening at the same time.
+async function decrementVariantStock(variantId, qty) {
+  const { error } = await supabaseAdmin.rpc("decrement_variant_stock", {
+    p_variant_id: variantId,
+    p_qty: qty,
+  });
+
+  if (error) {
+    if (error.message && error.message.includes("INSUFFICIENT_STOCK")) {
+      throw new Error("Not enough stock left for this item.");
+    }
+    throw error;
+  }
+}
+
+async function markOrderFailed(orderId, userId) {
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .update({ status: "failed" })
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error) throw error;
   return data;
 }
 
@@ -144,25 +359,15 @@ async function markOrderPaid(orderId, userId, paymentId) {
   if (error) throw parseCheckoutError(error);
   return data;
 }
-async function checkoutCart(userId) {
-  const { data, error } = await supabase
-    .rpc('create_pending_order', { p_user_id: userId });
-
-  if (error) {
-    console.error('Error in checkoutCart RPC:', error);
-    throw new Error(error.message || 'Failed to process checkout');
-  }
-
-  return data;
-}
-module.exports = { 
-  checkoutCart, 
+module.exports = {
   createPendingOrder,
-  getOrdersByUserId, 
+  getOrdersByUserId,
   hasUserPurchasedProduct,
   getAllOrdersForAdmin,
   updateOrderStatus,
   attachRazorpayOrderId,
   getOrderByIdForUser,
-  markOrderPaid 
+  decrementVariantStock,
+  finalizeOrderAfterPayment,
+  markOrderFailed,
 };

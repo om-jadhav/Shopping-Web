@@ -10,7 +10,7 @@ async function checkout(req, res) {
   try {
     const profile = await profileModel.getProfileById(req.user.id);
     if (profile?.role === "admin") {
-      return res.status(403).json({ error: "Admins cannot place orders." });
+      return res.status(403).json({ error: "Admins cannot place customer orders." });
     }
 
     const order = await orderModel.createPendingOrder(req.user.id);
@@ -25,7 +25,7 @@ async function checkout(req, res) {
     await orderModel.attachRazorpayOrderId(order.id, razorpayOrder.id);
 
     res.status(201).json({
-      message: "Order created. Proceed to payment.",
+      message: "Draft order created. Complete payment.",
       order,
       razorpayOrderId: razorpayOrder.id,
       amount: razorpayOrder.amount,
@@ -44,42 +44,38 @@ async function verifyPayment(req, res) {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({ error: "Missing payment verification fields." });
+      return res.status(400).json({ error: "Missing Razorpay payment data." });
     }
 
     const order = await orderModel.getOrderByIdForUser(id, req.user.id);
-    if (!order) return res.status(404).json({ error: "Order not found." });
-    
-    // Prevent re-processing non-pending orders
+    if (!order) {
+      return res.status(404).json({ error: "Order not found." });
+    }
+
     if (order.status !== "pending") {
-      return res.status(400).json({ error: "Order is no longer pending verification." });
+      return res.status(400).json({ error: "Order is not awaiting payment." });
     }
 
     if (order.razorpay_order_id !== razorpay_order_id) {
-      return res.status(400).json({ error: "Order/payment mismatch." });
+      return res.status(400).json({ error: "Razorpay order mismatch." });
     }
 
-    // Verify HMAC Signature securely
-    const expectedSignature = crypto
+    const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
-    const expectedBuffer = Buffer.from(expectedSignature, "utf8");
-    const receivedBuffer = Buffer.from(razorpay_signature, "utf8");
-
-    const signaturesMatch =
-      expectedBuffer.length === receivedBuffer.length &&
-      crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
-
-    if (!signaturesMatch) {
-      await orderModel.updateOrderStatus(id, "failed");
-      return res.status(400).json({ error: "Payment verification failed." });
+    if (generatedSignature !== razorpay_signature) {
+      await orderModel.markOrderFailed(id, req.user.id);
+      return res.status(400).json({ error: "Payment signature verification failed." });
     }
 
-    // Stock decrement, order_items, cart clear, and status commit
-    const updated = await orderModel.markOrderPaid(id, req.user.id, razorpay_payment_id);
-    res.json({ message: "Payment verified successfully.", order: updated });
+    const paidOrder = await orderModel.finalizeOrderAfterPayment(id, req.user.id, razorpay_payment_id);
+
+    res.status(200).json({
+      message: "Payment verified. Order placed successfully.",
+      order: paidOrder,
+    });
   } catch (err) {
     console.error("Verify Payment Error:", err);
     res.status(err.statusCode || 500).json({ error: err.message });
