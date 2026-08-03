@@ -29,37 +29,66 @@
       </div>
     </div>
 
-    <!-- ===== ADD / EDIT MATERIAL PANEL ===== -->
-    <div class="panel panel-compact">
-      <div class="panel-header panel-heading-row">
-        <h2 id="formHeading">Add material</h2>
-        <a href="#" id="cancelEditLink" class="cancel-link cancel-edit-link" style="display: none;">Cancel</a>
+    <!-- ===== TOP ROW ===== -->
+    <div class="dashboard-row">
+    
+      <!-- Add Material -->
+      <div class="panel panel-compact">
+        <div class="panel-header panel-heading-row">
+          <h2 id="formHeading">Add material</h2>
+          <a href="#" id="cancelEditLink" class="cancel-link cancel-edit-link" style="display:none;">Cancel</a>
+        </div>
+    
+        <form id="materialForm">
+          <div class="field-row">
+            <div class="form-group">
+              <label for="materialName">Name *</label>
+              <input id="materialName" type="text" required />
+            </div>
+    
+            <div class="form-group">
+              <label for="materialStock">Stock qty *</label>
+              <input id="materialStock" type="number" min="0" required />
+            </div>
+          </div>
+    
+          <button type="submit" id="submitBtn" class="btn-primary">
+            Add material
+          </button>
+    
+          <div id="formMsg" class="message"></div>
+        </form>
       </div>
-
-      <form id="materialForm">
+    
+      <!-- Printing Charges -->
+      <div class="panel panel-compact">
+        <h2>Printing Charges</h2>
+    
         <div class="field-row">
           <div class="form-group">
-            <label for="materialName">Name *</label>
-            <input id="materialName" type="text" placeholder="e.g., Cotton 100%" required />
+            <label>Single Side Printing (₹)</label>
+            <input type="number" id="singleSidePrice" min="0">
           </div>
-
+    
           <div class="form-group">
-            <label for="materialStock">Stock qty *</label>
-            <input id="materialStock" type="number" min="0" placeholder="50" required />
+            <label>Double Side Printing (₹)</label>
+            <input type="number" id="doubleSidePrice" min="0">
           </div>
         </div>
-
-        <button type="submit" id="submitBtn" class="btn-primary">Add material</button>
-        <div id="formMsg" class="message"></div>
-      </form>
+    
+        <button id="savePrintingPrice" class="btn-primary">
+          Save Prices
+        </button>
+    
+        <div id="printingPriceMsg" class="message"></div>
+      </div>
+    
     </div>
-
     <!-- ===== EXISTING MATERIALS PANEL ===== -->
     <div class="panel">
       <h2>Existing materials</h2>
       <div id="materialList" class="material-list-container">Loading…</div>
     </div>
-
     <!-- ===== CUSTOM ORDERS PANEL ===== -->
     <div class="panel">
       <h2>Custom Orders</h2>

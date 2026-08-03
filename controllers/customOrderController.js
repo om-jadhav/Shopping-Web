@@ -4,6 +4,7 @@ const customOrderModel = require("../models/customOrderModel");
 const materialModel = require("../models/materialModel");
 const profileModel = require("../models/profileModel");
 const { supabaseAdmin } = require("../config/supabaseClient");
+const printingPriceModel=require("../models/printingPriceModel");
 
 const BUCKET = "custom-order-designs";
 const VALID_PLACEMENTS = ["center", "left", "right"];
@@ -44,7 +45,6 @@ async function uploadPair(file, userId, label) {
 
   return { thumbUrl, hqUrl };
 }
-
 // POST /api/custom-orders (customer only)
 async function createCustomOrder(req, res) {
   try {
@@ -121,7 +121,6 @@ async function createCustomOrder(req, res) {
       await materialModel.decrementStock(materialId, -totalQuantity).catch(() => {});
       throw uploadErr;
     }
-
     const order = await customOrderModel.createCustomOrder({
       user_id: userId,
       color,
@@ -141,6 +140,8 @@ async function createCustomOrder(req, res) {
       total_quantity: totalQuantity,
       terms_accepted: true,
       terms_accepted_at: new Date().toISOString(),
+      printing_price: printingPrice,
+      total_price: totalPrice,
     });
 
     res.status(201).json({ message: "Custom order placed successfully.", order });

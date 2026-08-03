@@ -7,6 +7,10 @@ const materialList = document.getElementById("materialList");
 const logoutLink = document.getElementById("logoutLink");
 const formHeading = document.getElementById("formHeading");
 const cancelEditLink = document.getElementById("cancelEditLink");
+const singleSidePriceInput = document.getElementById("singleSidePrice");
+const doubleSidePriceInput = document.getElementById("doubleSidePrice");
+const savePrintingPriceBtn = document.getElementById("savePrintingPrice");
+const printingPriceMsg = document.getElementById("printingPriceMsg");
 
 let editingMaterialId = null;
 let cachedMaterialsList = [];
@@ -363,6 +367,45 @@ async function loadCustomOrders() {
     customOrderList.innerHTML = `<p class="stock-note">Could not load custom orders: ${err.message}</p>`;
   }
 }
+async function loadPrintingPrices() {
+  try {
+
+    const data = await apiGet("/printing-prices", token);
+
+    singleSidePriceInput.value = data.single_side_price;
+    doubleSidePriceInput.value = data.double_side_price;
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+savePrintingPriceBtn.addEventListener("click", async () => {
+  try {
+
+    const res = await fetch("/api/printing-prices", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        singleSidePrice: Number(singleSidePriceInput.value),
+        doubleSidePrice: Number(doubleSidePriceInput.value),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to update prices.");
+    }
+
+    showMessage(printingPriceMsg, "Printing prices updated.", "success");
+
+  } catch (err) {
+    showMessage(printingPriceMsg, err.message, "error");
+  }
+});
 
 async function init() {
   if (!token) {
@@ -384,6 +427,7 @@ async function init() {
 
   loadMaterialList();
   loadCustomOrders();
+  loadPrintingPrices();
 }
 
 init();
