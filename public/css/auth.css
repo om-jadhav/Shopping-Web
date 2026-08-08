@@ -46,7 +46,10 @@ body.auth-page {
   margin-bottom: 60px;
   animation: fadeInDown 0.6s ease both;
 }
-
+.tag-logo {
+  height: 50px;
+  width: 100px;
+}
 .auth-visual .tag .brand-accent {
   color: var(--accent);
 }

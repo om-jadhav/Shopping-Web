@@ -3,16 +3,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
 
 :root {
-  --bg: #11131a;
-  --surface: #1a1d27;
-  --surface-border: #2a2e3a;
-  --text: #f3f1ec;
-  --muted: #9aa0ad;
-  --accent: #ff7a52;
-  --accent-soft: #ffe2d6;
-  --error: #ff6b6b;
-  --success: #6bdc9c;
+  /* core surfaces */
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-border: #2c2c2c;
+  --text: #f5f2e8;
+  --muted: #9a958c;
+ 
+  /* brand */
+  --yellow: #f5d800;
+  --yellow-dim: #d9c000;
+  --pink: #e8158c;
+  --pink-dim: #c4126f;
+  --ink: #0a0a0a;
+ 
+  /* semantic (kept for existing JS/CSS hooks) */
+  --accent: var(--yellow);
+  --accent-soft: #fff3a0;
+  --error: #ff5470;
+  --success: #4ade80;
+ 
   --radius: 10px;
+  --radius-sm: 6px;
+  --border-w: 2px;
+ 
+  --announce-h: 34px;
+  --header-h: 93px;
 }
 
 * {
@@ -24,7 +40,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Anton', system-ui, sans-serif;
 
   display: flex;
   align-items: center;
@@ -47,20 +63,42 @@ body {
   align-items: center;
   gap: 8px;
 
-  font-family: 'Fraunces', serif;
-  font-weight: 600;
-  font-size: 1.1rem;
+  text-decoration: none;
   color: var(--text);
 
   z-index: 1001;
 }
 
-.tag::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
+.tag-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
+/* =========================================================
+   ANNOUNCEMENT BAR
+========================================================= */
+
+.announce-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--announce-h);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--ink);
+  color: var(--yellow);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+
+  z-index: 1001;
 }
 
 /* =========================================================
@@ -253,17 +291,11 @@ body.page-shop {
   padding: 20px;
 }
 
-/* =========================================================
-   SHOP BRAND
-========================================================= */
-
-body.page-shop .tag {
-  position: fixed;
-
-  top: 24px;
-  left: 32px;
-
-  z-index: 1000;
+/* body doesn't use .page-shop (e.g. index.html/dashboard) but still sits
+   under the fixed announcement bar + header — give it top clearance too */
+body.has-fixed-header {
+  padding-top: calc(var(--announce-h) + var(--header-h) + 24px);
+  align-items: flex-start;
 }
 
 /* =========================================================
@@ -271,17 +303,16 @@ body.page-shop .tag {
 ========================================================= */
 
 .site-header{
-    position:fixed;
-    top:0;
+    position:absolute;
+    top:var(--announce-h);
     left:0;
     width:100%;
-    height:76px;
+    height:var(--header-h);
     display:flex;
     align-items:center;
     justify-content:center;
-    background:rgba(17,19,26,.94);
-    backdrop-filter:blur(14px);
-    border-bottom:1px solid rgba(255,255,255,.06);
+    background:var(--yellow);
+    border-bottom:var(--border-w) solid var(--ink);
     z-index:1000;
 }
 
@@ -295,35 +326,23 @@ body.page-shop .tag {
     position:absolute;
 
     left:32px;
+    top:50%;
+    transform:translateY(-50%);
 
     display:flex;
     align-items:center;
-    gap:10px;
 
     text-decoration:none;
-
-    color:var(--text);
-
-    font-family:'Fraunces',serif;
-
-    font-size:1.15rem;
-
-    font-weight:700;
 
     white-space:nowrap;
 
 }
 
-.tag::before{
+.tag-logo{
 
-    content:"";
-
-    width:10px;
-    height:10px;
-
-    border-radius:50%;
-
-    background:var(--accent);
+    height:36px;
+    width:auto;
+    display:block;
 
 }
 
@@ -345,9 +364,13 @@ body.page-shop .tag {
 
     position:relative;
 
-    color:var(--muted);
+    color:var(--ink);
 
     text-decoration:none;
+
+    font-family:'Anton','Fraunces';
+
+    letter-spacing:.02em;
 
     font-size:.95rem;
 
@@ -357,13 +380,13 @@ body.page-shop .tag {
 
 .nav-links a:hover{
 
-    color:var(--text);
+    color:var(--pink);
 
 }
 
 .nav-links a.active{
 
-    color:var(--text);
+    color:var(--pink);
 
 }
 
@@ -379,7 +402,7 @@ body.page-shop .tag {
     width:100%;
     height:2px;
 
-    background:var(--accent);
+    background:var(--pink);
 
     transform:scaleX(0);
 
@@ -408,13 +431,13 @@ body.page-shop .tag {
 
     content:"◉ ";
 
-    color:var(--accent);
+    color:var(--pink);
 
 }
 
 #navLogout{
 
-    color:#c8a7a0;
+    color:#6b2038;
 
 }
 
@@ -443,7 +466,7 @@ body.page-shop .tag {
     border: none;
     background: transparent;
 
-    color: #fff;
+    color: var(--ink);
     font-size: 30px;
     line-height: 1;
 
@@ -461,7 +484,7 @@ body.page-shop .tag {
 }
 
 .menu-toggle:hover{
-    color: var(--accent);
+    color: var(--pink);
     transform: translateY(-50%) scale(1.08);
 }
 
@@ -531,7 +554,7 @@ body.page-shop .tag {
     border:none;
     background:none;
 
-    color:#fff;
+    color:var(--ink);
     font-size:28px;
     line-height:1;
     cursor:pointer;
@@ -546,7 +569,11 @@ body.page-shop .tag {
 
     left:18px;
 
-    font-size:1rem;
+}
+
+.tag-logo{
+
+    height:28px;
 
 }
 
@@ -554,7 +581,7 @@ body.page-shop .tag {
 
     position:absolute;
 
-    top:76px;
+    top:calc(var(--announce-h) + var(--header-h));
 
     left:0;
 
@@ -568,7 +595,7 @@ body.page-shop .tag {
 
     background:#11131a;
 
-    border-top:1px solid rgba(255,255,255,.08);
+    border-top:var(--border-w) solid var(--yellow);
 
     max-height:0;
 
@@ -593,6 +620,8 @@ body.page-shop .tag {
     padding:16px;
 
     text-align:center;
+
+    color:var(--text);
 
 }
 
